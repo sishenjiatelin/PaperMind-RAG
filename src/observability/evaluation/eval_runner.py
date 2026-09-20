@@ -15,11 +15,12 @@ from __future__ import annotations
 import json
 import logging
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from src.libs.evaluator.base_evaluator import BaseEvaluator
+from src.observability.evaluation.retrieval_metrics import compute_retrieval_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,7 @@ class GoldenTestCase:
     expected_chunk_ids: List[str] = field(default_factory=list)
     expected_sources: List[str] = field(default_factory=list)
     reference_answer: Optional[str] = None
+    relevance_judgments: Dict[str, float] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> GoldenTestCase:
@@ -47,6 +49,10 @@ class GoldenTestCase:
             expected_chunk_ids=data.get("expected_chunk_ids", []),
             expected_sources=data.get("expected_sources", []),
             reference_answer=data.get("reference_answer"),
+            relevance_judgments={
+                str(key): float(value)
+                for key, value in (data.get("relevance_judgments") or {}).items()
+            },
         )
 
 
@@ -64,8 +70,14 @@ class QueryResult:
 
     query: str
     retrieved_chunk_ids: List[str] = field(default_factory=list)
+    retrieved_results: List[Dict[str, Any]] = field(default_factory=list)
     generated_answer: Optional[str] = None
+    reference_answer: Optional[str] = None
+    expected_sources: List[str] = field(default_factory=list)
+    expected_chunk_ids: List[str] = field(default_factory=list)
+    relevance_judgments: Dict[str, float] = field(default_factory=dict)
     metrics: Dict[str, float] = field(default_factory=dict)
+    metric_status: Dict[str, str] = field(default_factory=dict)
     elapsed_ms: float = 0.0
 
 
@@ -101,8 +113,14 @@ class EvalReport:
                 {
                     "query": qr.query,
                     "retrieved_chunk_ids": qr.retrieved_chunk_ids,
+                    "retrieved_results": qr.retrieved_results,
                     "generated_answer": qr.generated_answer,
+                    "reference_answer": qr.reference_answer,
+                    "expected_sources": qr.expected_sources,
+                    "expected_chunk_ids": qr.expected_chunk_ids,
+                    "relevance_judgments": qr.relevance_judgments,
                     "metrics": {k: round(v, 4) for k, v in qr.metrics.items()},
+                    "metric_status": qr.metric_status,
                     "elapsed_ms": round(qr.elapsed_ms, 1),
                 }
                 for qr in self.query_results
@@ -175,8 +193,8 @@ class EvalRunner:
             hybrid_search: HybridSearch instance for retrieval.
             evaluator: BaseEvaluator instance for scoring.
             answer_generator: Optional callable(query, chunks) -> str
-                for generating answers. If None, a simple concatenation
-                is used as a placeholder.
+                for generating answers. Ragas evaluation requires this to be
+                provided; retrieved context is never used as a fake answer.
             answer_overrides: Optional dict mapping test case index (0-based)
                 to a user-provided answer string. When present, the override
                 answer is used instead of auto-generation for that test case.
@@ -271,14 +289,30 @@ class EvalRunner:
         """
         t0 = time.monotonic()
         qr = QueryResult(query=test_case.query)
+        qr.reference_answer = test_case.reference_answer
+        qr.expected_sources = list(test_case.expected_sources)
+        qr.expected_chunk_ids = list(test_case.expected_chunk_ids)
+        qr.relevance_judgments = dict(test_case.relevance_judgments)
 
         # Step 1: Retrieve chunks
         retrieved_chunks = self._retrieve(test_case.query, top_k, collection)
         qr.retrieved_chunk_ids = [
             self._get_chunk_id(c) for c in retrieved_chunks
         ]
+        qr.retrieved_results = [self._serialize_retrieved_result(c) for c in retrieved_chunks]
+        for rank, result in enumerate(qr.retrieved_results, start=1):
+            result["rank"] = rank
 
-        # Step 2: Generate answer — prefer user override, then generator, then fallback
+        retrieval_metrics, unavailable = compute_retrieval_metrics(
+            qr.retrieved_chunk_ids,
+            top_k=top_k,
+            expected_chunk_ids=test_case.expected_chunk_ids,
+            relevance_judgments=test_case.relevance_judgments,
+        )
+        qr.metrics.update(retrieval_metrics)
+        qr.metric_status.update(unavailable)
+
+        # Step 2: Generate answer — prefer user override, then the real generator.
         if answer_override:
             answer = answer_override
         else:
@@ -300,10 +334,11 @@ class EvalRunner:
                 generated_answer=answer,
                 ground_truth=ground_truth,
             )
-            qr.metrics = metrics
+            qr.metrics.update(metrics)
         except Exception as exc:
             logger.warning("Evaluation failed for '%s': %s", test_case.query[:40], exc)
-            qr.metrics = {}
+            # Keep shared retrieval metrics even when an optional evaluator
+            # backend cannot score this query.
 
         qr.elapsed_ms = (time.monotonic() - t0) * 1000.0
         return qr
@@ -343,31 +378,29 @@ class EvalRunner:
             logger.warning("Retrieval failed for '%s': %s", query[:40], exc)
             return []
 
-    def _generate_answer(self, query: str, chunks: List[Any]) -> str:
+    def _generate_answer(self, query: str, chunks: List[Any]) -> Optional[str]:
         """Generate an answer from retrieved chunks.
 
-        If a custom answer_generator is provided, use it.
-        Otherwise, concatenate chunk texts as a simple placeholder.
+        A Ragas evaluator must receive an answer generated by the configured
+        answer model. It is invalid to concatenate retrieved chunks as a
+        substitute, so missing or failed generation is surfaced explicitly.
         """
-        if self.answer_generator is not None:
-            try:
-                return self.answer_generator(query, chunks)
-            except Exception as exc:
-                logger.warning("Answer generation failed: %s", exc)
+        if self.answer_generator is None:
+            if getattr(self.evaluator, "requires_generated_answer", False):
+                raise ValueError(
+                    "EvalRunner requires an answer_generator for Ragas evaluation; "
+                    "retrieved context cannot be used as generated_answer."
+                )
+            return None
 
-        # Fallback: concatenate chunk texts
-        texts = []
-        for c in chunks:
-            if isinstance(c, str):
-                texts.append(c)
-            elif isinstance(c, dict):
-                texts.append(c.get("text", str(c)))
-            elif hasattr(c, "text"):
-                texts.append(str(getattr(c, "text")))
-            else:
-                texts.append(str(c))
+        try:
+            answer = self.answer_generator(query, chunks)
+        except Exception as exc:
+            raise RuntimeError(f"Answer generation failed: {exc}") from exc
 
-        return " ".join(texts[:5])  # first 5 chunks
+        if not isinstance(answer, str) or not answer.strip():
+            raise ValueError("Answer generator returned an empty answer")
+        return answer
 
     def _get_chunk_id(self, chunk: Any) -> str:
         """Extract chunk ID from various representations."""
@@ -383,6 +416,32 @@ class EvalRunner:
         if hasattr(chunk, "id"):
             return str(getattr(chunk, "id"))
         return str(chunk)
+
+    def _serialize_retrieved_result(self, chunk: Any) -> Dict[str, Any]:
+        """Expose ranked retrieval data without coupling the Dashboard to types."""
+        chunk_id = self._get_chunk_id(chunk)
+        metadata: Dict[str, Any] = {}
+        if isinstance(chunk, dict):
+            metadata = dict(chunk.get("metadata") or {})
+            score = chunk.get("score", 0.0)
+        else:
+            metadata = dict(getattr(chunk, "metadata", {}) or {})
+            score = getattr(chunk, "score", 0.0)
+
+        try:
+            final_score = float(score)
+        except (TypeError, ValueError):
+            final_score = 0.0
+
+        return {
+            "rank": 0,  # assigned below after the full list is built
+            "chunk_id": chunk_id,
+            "source": metadata.get("source_path", metadata.get("source", "")),
+            "score": final_score,
+            "retrieval_score": metadata.get("original_score", final_score),
+            "fusion_score": metadata.get("original_score", final_score),
+            "rerank_score": metadata.get("rerank_score", final_score),
+        }
 
     @staticmethod
     def _aggregate_metrics(results: List[QueryResult]) -> Dict[str, float]:

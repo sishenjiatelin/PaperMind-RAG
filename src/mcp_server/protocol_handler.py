@@ -239,22 +239,41 @@ def create_mcp_server(
     if register_tools:
         _register_default_tools(protocol_handler)
 
-    # Create low-level server
-    server = Server(server_name)
+    # The low-level Server API changed from decorator registration to
+    # constructor callbacks.  Keep the legacy branch for older MCP SDKs,
+    # while using the current callback API when those decorators are absent.
+    async def handle_list_tools(_ctx: Any, _params: Any) -> types.ListToolsResult:
+        """Handle a tools/list request for current MCP SDKs."""
+        return types.ListToolsResult(tools=protocol_handler.get_tool_schemas())
 
-    # Register tools/list handler
-    @server.list_tools()
-    async def handle_list_tools() -> List[types.Tool]:
-        """Handle tools/list request."""
-        return protocol_handler.get_tool_schemas()
+    async def handle_call_tool(_ctx: Any, params: Any) -> types.CallToolResult:
+        """Handle a tools/call request for current MCP SDKs."""
+        arguments = getattr(params, "arguments", None) or {}
+        return await protocol_handler.execute_tool(
+            getattr(params, "name", ""), arguments
+        )
 
-    # Register tools/call handler
-    @server.call_tool()
-    async def handle_call_tool(
-        name: str, arguments: Dict[str, Any]
-    ) -> types.CallToolResult:
-        """Handle tools/call request."""
-        return await protocol_handler.execute_tool(name, arguments)
+    # Older MCP SDKs exposed list_tools()/call_tool() decorators.  The
+    # installed SDK uses on_list_tools/on_call_tool constructor callbacks.
+    if hasattr(Server, "list_tools") and hasattr(Server, "call_tool"):
+        server = Server(server_name, version=server_version)
+
+        @server.list_tools()
+        async def legacy_list_tools() -> List[types.Tool]:
+            return protocol_handler.get_tool_schemas()
+
+        @server.call_tool()
+        async def legacy_call_tool(
+            name: str, arguments: Dict[str, Any]
+        ) -> types.CallToolResult:
+            return await protocol_handler.execute_tool(name, arguments)
+    else:
+        server = Server(
+            server_name,
+            version=server_version,
+            on_list_tools=handle_list_tools,
+            on_call_tool=handle_call_tool,
+        )
 
     # Store protocol handler on server for access
     server._protocol_handler = protocol_handler  # type: ignore[attr-defined]

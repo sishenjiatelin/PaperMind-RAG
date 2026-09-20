@@ -285,11 +285,10 @@ class ListCollectionsTool:
         logger.info(f"Executing list_collections (include_stats={include_stats})")
         
         try:
-            # Run blocking ChromaDB I/O in a thread to avoid blocking
-            # the async event loop / MCP stdio transport
-            collections = await asyncio.to_thread(
-                self.list_collections, include_stats,
-            )
+            # Chroma's SQLite-backed client does not reliably hand control
+            # back from asyncio.to_thread in this stdio subprocess.  This is
+            # a short local operation, so keep it on the server event loop.
+            collections = self.list_collections(include_stats)
             response_text = self.format_response(collections)
             
             return types.CallToolResult(

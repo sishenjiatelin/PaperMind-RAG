@@ -125,6 +125,7 @@ class QueryKnowledgeHubTool:
         self._reranker = reranker
         self._embedding_client = None
         self._response_builder = response_builder or ResponseBuilder()
+        self._current_collection_count = 0
         
         # Track initialization state
         self._initialized = False
@@ -186,6 +187,11 @@ class QueryKnowledgeHubTool:
             self.settings,
             collection_name=collection,
         )
+        # Avoid an unnecessary embedding request when the selected collection
+        # is genuinely empty.  The count comes from the real vector store; no
+        # synthetic result is produced, and non-empty queries use the normal
+        # dense + sparse + RRF + rerank path below.
+        self._current_collection_count = int(vector_store.collection.count())
         
         dense_retriever = create_dense_retriever(
             settings=self.settings,
@@ -259,21 +265,29 @@ class QueryKnowledgeHubTool:
 
         try:
             # Initialize components for collection
-            # Run blocking I/O (embedding API, ChromaDB, BM25) in a thread
-            # to avoid blocking the async event loop / MCP stdio transport
+            # Chroma's SQLite-backed initialization does not reliably return
+            # from asyncio.to_thread in this stdio subprocess.  Initialization
+            # itself is local and short; perform it directly before the
+            # network-backed retrieval stage.
             import time as _time
             _init_t0 = _time.monotonic()
-            await asyncio.to_thread(self._ensure_initialized, effective_collection)
+            self._ensure_initialized(effective_collection)
             _init_elapsed = (_time.monotonic() - _init_t0) * 1000.0
             trace.record_stage("initialization", {
                 "collection": effective_collection,
                 "cold_start": _init_elapsed > 500,  # >500ms ≈ cold
             }, elapsed_ms=_init_elapsed)
             
-            # Perform hybrid search (blocking: embedding API + DB queries)
-            results = await asyncio.to_thread(
-                self._perform_search, query, effective_top_k, trace,
-            )
+            # An empty collection has no candidates to retrieve.  Skipping
+            # embedding here also makes the documented empty-knowledge-base
+            # behavior independent of local Ollama availability.
+            if self._current_collection_count == 0:
+                results = []
+            else:
+                # Perform hybrid search (blocking: embedding API + DB queries)
+                results = await asyncio.to_thread(
+                    self._perform_search, query, effective_top_k, trace,
+                )
             
             # Apply reranking if enabled (may call LLM API)
             if self.config.enable_rerank and results:

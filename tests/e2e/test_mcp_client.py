@@ -40,7 +40,7 @@ def _start_server() -> subprocess.Popen:
     """
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
-    return subprocess.Popen(
+    proc = subprocess.Popen(
         [sys.executable, "-m", "src.mcp_server.server"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
@@ -51,6 +51,19 @@ def _start_server() -> subprocess.Popen:
         cwd=str(PROJECT_ROOT),
         env=env,
     )
+
+    # Drain stderr independently.  It is deliberately kept separate from
+    # stdout because stdout is the MCP JSON-RPC wire stream.
+    stderr_lines: List[str] = []
+    setattr(proc, "_mcp_stderr_lines", stderr_lines)
+
+    def _stderr_reader() -> None:
+        assert proc.stderr is not None
+        for line in proc.stderr:
+            stderr_lines.append(line.rstrip("\r\n"))
+
+    threading.Thread(target=_stderr_reader, daemon=True).start()
+    return proc
 
 
 def _send_jsonrpc(
@@ -81,6 +94,7 @@ def _send_jsonrpc(
         proc.stdin.flush()
 
     responses: List[Dict[str, Any]] = []
+    stdout_non_json: List[str] = []
     stop_event = threading.Event()
 
     def _reader() -> None:
@@ -95,6 +109,9 @@ def _send_jsonrpc(
             try:
                 data = json.loads(stripped)
             except json.JSONDecodeError:
+                # Never hide stdout protocol pollution.  Keep it for the
+                # assertion diagnostics instead of treating it as noise.
+                stdout_non_json.append(stripped)
                 continue
             if "id" in data and ("result" in data or "error" in data):
                 responses.append(data)
@@ -108,7 +125,20 @@ def _send_jsonrpc(
         time.sleep(0.1)
 
     stop_event.set()
+    reader_thread.join(timeout=0.2)
+    setattr(proc, "_mcp_stdout_non_json", stdout_non_json)
     return responses
+
+
+def _diagnostic_summary(proc: subprocess.Popen) -> str:
+    """Return subprocess diagnostics without merging stderr into stdout."""
+    stderr = getattr(proc, "_mcp_stderr_lines", [])
+    stdout_non_json = getattr(proc, "_mcp_stdout_non_json", [])
+    return (
+        f"returncode={proc.poll()}, "
+        f"stdout_non_json={stdout_non_json!r}, "
+        f"stderr={stderr!r}"
+    )
 
 
 def _find(responses: List[Dict[str, Any]], req_id: int) -> Optional[Dict[str, Any]]:
@@ -184,7 +214,10 @@ class TestMCPClientE2E:
 
         # -- initialize ------------------------------------------------
         init_resp = _find(responses, 1)
-        assert init_resp is not None, f"Missing initialize response. Got: {responses}"
+        assert init_resp is not None, (
+            f"Missing initialize response. Got: {responses}; "
+            f"{_diagnostic_summary(mcp_server)}"
+        )
         assert "result" in init_resp
         assert "serverInfo" in init_resp["result"]
         assert "capabilities" in init_resp["result"]
@@ -192,7 +225,14 @@ class TestMCPClientE2E:
 
         # -- tools/list ------------------------------------------------
         tools_resp = _find(responses, 2)
-        assert tools_resp is not None, f"Missing tools/list response. Got: {responses}"
+        assert tools_resp is not None, (
+            f"Missing tools/list response. Got: {responses}; "
+            f"{_diagnostic_summary(mcp_server)}"
+        )
+        assert not getattr(mcp_server, "_mcp_stdout_non_json", []), (
+            "MCP stdout contained non-JSON-RPC output: "
+            f"{_diagnostic_summary(mcp_server)}"
+        )
         assert "result" in tools_resp
         tools = tools_resp["result"]["tools"]
         assert isinstance(tools, list)
@@ -245,10 +285,16 @@ class TestMCPClientE2E:
         responses = _send_jsonrpc(mcp_server, messages, expected_responses=2, timeout=60.0)
 
         init_resp = _find(responses, 1)
-        assert init_resp is not None, "Missing initialize response"
+        assert init_resp is not None, (
+            "Missing initialize response; "
+            f"{_diagnostic_summary(mcp_server)}"
+        )
 
         call_resp = _find(responses, 2)
-        assert call_resp is not None, f"Missing tools/call response. Got: {responses}"
+        assert call_resp is not None, (
+            f"Missing tools/call response. Got: {responses}; "
+            f"{_diagnostic_summary(mcp_server)}"
+        )
         assert "result" in call_resp, f"Expected result in response: {call_resp}"
 
         result = call_resp["result"]
@@ -292,7 +338,10 @@ class TestMCPClientE2E:
         responses = _send_jsonrpc(mcp_server, messages, expected_responses=2, timeout=15.0)
 
         call_resp = _find(responses, 2)
-        assert call_resp is not None, f"Missing tools/call response. Got: {responses}"
+        assert call_resp is not None, (
+            f"Missing tools/call response. Got: {responses}; "
+            f"{_diagnostic_summary(mcp_server)}"
+        )
         assert "result" in call_resp
 
         result = call_resp["result"]
@@ -333,7 +382,10 @@ class TestMCPClientE2E:
         responses = _send_jsonrpc(mcp_server, messages, expected_responses=2, timeout=15.0)
 
         call_resp = _find(responses, 2)
-        assert call_resp is not None, f"Missing tools/call response. Got: {responses}"
+        assert call_resp is not None, (
+            f"Missing tools/call response. Got: {responses}; "
+            f"{_diagnostic_summary(mcp_server)}"
+        )
         assert "result" in call_resp
 
         result = call_resp["result"]
@@ -426,13 +478,19 @@ class TestMCPClientE2E:
 
         # Validate tools/list
         tools_resp = _find(responses, 2)
-        assert tools_resp is not None, "Missing tools/list response"
+        assert tools_resp is not None, (
+            "Missing tools/list response; "
+            f"{_diagnostic_summary(mcp_server)}"
+        )
         tool_names = {t["name"] for t in tools_resp["result"]["tools"]}
         assert "query_knowledge_hub" in tool_names
 
         # Validate query response
         query_resp = _find(responses, 3)
-        assert query_resp is not None, f"Missing query response. Got: {responses}"
+        assert query_resp is not None, (
+            f"Missing query response. Got: {responses}; "
+            f"{_diagnostic_summary(mcp_server)}"
+        )
         assert "result" in query_resp
 
         result = query_resp["result"]
@@ -511,7 +569,10 @@ class TestMCPClientE2E:
         # All four responses (init + 3 tool calls) should arrive
         for req_id in (1, 2, 3, 4):
             resp = _find(responses, req_id)
-            assert resp is not None, f"Missing response for id={req_id}. Got: {responses}"
+            assert resp is not None, (
+                f"Missing response for id={req_id}. Got: {responses}; "
+                f"{_diagnostic_summary(mcp_server)}"
+            )
             assert "result" in resp, f"Response id={req_id} missing 'result': {resp}"
 
         # Each tool call result should have valid content

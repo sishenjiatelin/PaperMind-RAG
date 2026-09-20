@@ -13,6 +13,8 @@ Design Principles:
 
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
 from typing import Any, Dict, List, Optional, Sequence
 
@@ -60,6 +62,10 @@ class RagasEvaluator(BaseEvaluator):
         )
         # metrics == {"faithfulness": 0.95, "answer_relevancy": 0.88, ...}
     """
+
+    # EvalRunner uses this marker to reject an invalid no-generator setup
+    # instead of silently turning retrieved context into an answer.
+    requires_generated_answer = True
 
     def __init__(
         self,
@@ -161,9 +167,9 @@ class RagasEvaluator(BaseEvaluator):
         - AnswerRelevancy: (user_input, response)
         """
         from ragas.metrics.collections import (
-            Faithfulness,
             AnswerRelevancy,
             ContextPrecisionWithoutReference,
+            Faithfulness,
         )
 
         # Build LLM / Embedding wrappers from settings
@@ -195,75 +201,179 @@ class RagasEvaluator(BaseEvaluator):
     def _build_wrappers(self) -> tuple:
         """Build Ragas LLM and Embedding wrappers from project settings.
 
-        Uses Ragas 0.4+ native API (InstructorLLM + OpenAIEmbeddings)
-        instead of deprecated LangchainLLMWrapper.
+        Uses Ragas 0.4+ native collection metrics. OpenAI/Azure continue to
+        use Ragas' native clients; DeepSeek/Ollama use adapters around the
+        project's existing Provider factories.
 
         Returns:
             Tuple of (llm_wrapper, embeddings_wrapper).
         """
-        from openai import AsyncAzureOpenAI, AsyncOpenAI
-        from ragas.llms import llm_factory
-        from ragas.embeddings import OpenAIEmbeddings
-
         if self.settings is None:
             raise ValueError("Settings required to create LLM for Ragas evaluation")
 
         # ── LLM ──
         llm_cfg = self.settings.llm
         provider = llm_cfg.provider.lower()
-        llm_azure_endpoint = getattr(llm_cfg, "azure_endpoint", None)
 
-        # Azure-compatible mode: if azure_endpoint is configured, use Azure
-        # client even when provider is "openai" (matches project convention).
-        use_azure_llm = (
-            provider == "azure"
-            or (provider == "openai" and llm_azure_endpoint)
-        )
+        # DeepSeek is intentionally created through the project's provider
+        # factory.  The adapter below only translates Ragas structured-output
+        # requests to the existing BaseLLM interface; it does not implement a
+        # second DeepSeek client.
+        if provider == "deepseek":
+            from src.libs.llm.llm_factory import LLMFactory
 
-        if use_azure_llm:
-            llm_client = AsyncAzureOpenAI(
-                api_key=llm_cfg.api_key,
-                azure_endpoint=llm_azure_endpoint or llm_cfg.azure_endpoint,
-                api_version=getattr(llm_cfg, "api_version", None) or "2024-02-15-preview",
-            )
-        elif provider == "openai":
-            llm_client = AsyncOpenAI(api_key=llm_cfg.api_key)
+            project_llm = LLMFactory.create(self.settings)
+            llm = self._project_llm_wrapper(project_llm, provider, llm_cfg.model)
         else:
-            raise ValueError(
-                f"Unsupported LLM provider for Ragas: '{provider}'. "
-                "Supported: azure, openai"
+            from openai import AsyncAzureOpenAI, AsyncOpenAI
+            from ragas.llms import llm_factory
+
+            llm_azure_endpoint = getattr(llm_cfg, "azure_endpoint", None)
+
+            # Azure-compatible mode: if azure_endpoint is configured, use Azure
+            # client even when provider is "openai" (matches project convention).
+            use_azure_llm = (
+                provider == "azure"
+                or (provider == "openai" and llm_azure_endpoint)
             )
 
-        llm = llm_factory(llm_cfg.model, client=llm_client, max_tokens=8192)
+            if use_azure_llm:
+                llm_client = AsyncAzureOpenAI(
+                    api_key=llm_cfg.api_key,
+                    azure_endpoint=llm_azure_endpoint or llm_cfg.azure_endpoint,
+                    api_version=getattr(llm_cfg, "api_version", None) or "2024-02-15-preview",
+                )
+            elif provider == "openai":
+                llm_client = AsyncOpenAI(api_key=llm_cfg.api_key)
+            else:
+                raise ValueError(
+                    f"Unsupported LLM provider for Ragas: '{provider}'. "
+                    "Supported: azure, openai, deepseek"
+                )
+
+            # Keep the existing OpenAI/Azure Ragas integration unchanged.
+            llm = llm_factory(llm_cfg.model, client=llm_client, max_tokens=8192)
 
         # ── Embeddings ──
         emb_cfg = self.settings.embedding
         emb_provider = emb_cfg.provider.lower()
-        emb_azure_endpoint = getattr(emb_cfg, "azure_endpoint", None)
+        if emb_provider == "ollama":
+            from src.libs.embedding.embedding_factory import EmbeddingFactory
 
-        # Same Azure-compatible mode detection for embeddings
-        use_azure_emb = (
-            emb_provider == "azure"
-            or (emb_provider == "openai" and emb_azure_endpoint)
-        )
-
-        if use_azure_emb:
-            emb_client = AsyncAzureOpenAI(
-                api_key=emb_cfg.api_key,
-                azure_endpoint=emb_azure_endpoint or emb_cfg.azure_endpoint,
-                api_version=getattr(emb_cfg, "api_version", None) or "2024-02-15-preview",
-            )
-        elif emb_provider == "openai":
-            emb_client = AsyncOpenAI(api_key=emb_cfg.api_key)
+            project_embedding = EmbeddingFactory.create(self.settings)
+            embeddings = self._project_embedding_wrapper(project_embedding)
         else:
-            raise ValueError(
-                f"Unsupported embedding provider for Ragas: '{emb_provider}'. "
-                "Supported: azure, openai"
+            from openai import AsyncAzureOpenAI, AsyncOpenAI
+            from ragas.embeddings import OpenAIEmbeddings
+
+            emb_azure_endpoint = getattr(emb_cfg, "azure_endpoint", None)
+
+            # Same Azure-compatible mode detection for embeddings.
+            use_azure_emb = (
+                emb_provider == "azure"
+                or (emb_provider == "openai" and emb_azure_endpoint)
             )
 
-        embeddings = OpenAIEmbeddings(model=emb_cfg.model, client=emb_client)
+            if use_azure_emb:
+                emb_client = AsyncAzureOpenAI(
+                    api_key=emb_cfg.api_key,
+                    azure_endpoint=emb_azure_endpoint or emb_cfg.azure_endpoint,
+                    api_version=getattr(emb_cfg, "api_version", None) or "2024-02-15-preview",
+                )
+            elif emb_provider == "openai":
+                emb_client = AsyncOpenAI(api_key=emb_cfg.api_key)
+            else:
+                raise ValueError(
+                    f"Unsupported embedding provider for Ragas: '{emb_provider}'. "
+                    "Supported: azure, openai, ollama"
+                )
+
+            embeddings = OpenAIEmbeddings(model=emb_cfg.model, client=emb_client)
 
         return llm, embeddings
+
+    @staticmethod
+    def _project_llm_wrapper(project_llm: Any, provider: str, model: str) -> Any:
+        """Adapt an existing project LLM to Ragas structured-output calls."""
+        from ragas.llms.base import InstructorBaseRagasLLM
+
+        from src.libs.llm.base_llm import Message
+
+        class ProjectRagasLLM(InstructorBaseRagasLLM):
+            def __init__(self) -> None:
+                self.project_llm = project_llm
+                self.provider = provider
+                self.model = model
+
+            def generate(self, prompt: str, response_model: Any) -> Any:
+                response = self.project_llm.chat(
+                    [
+                        Message(
+                            role="system",
+                            content=(
+                                "Return only valid JSON matching the requested output "
+                                "schema. Do not include markdown fences or commentary."
+                            ),
+                        ),
+                        Message(role="user", content=prompt),
+                    ],
+                    temperature=getattr(self.project_llm, "default_temperature", 0.0),
+                    max_tokens=getattr(self.project_llm, "default_max_tokens", 8192),
+                )
+                return RagasEvaluator._parse_structured_response(
+                    response.content, response_model
+                )
+
+            async def agenerate(self, prompt: str, response_model: Any) -> Any:
+                return await asyncio.to_thread(self.generate, prompt, response_model)
+
+        return ProjectRagasLLM()
+
+    @staticmethod
+    def _project_embedding_wrapper(project_embedding: Any) -> Any:
+        """Adapt an existing project embedding provider to Ragas embeddings."""
+        from ragas.embeddings.base import BaseRagasEmbedding
+
+        class ProjectRagasEmbedding(BaseRagasEmbedding):
+            def __init__(self) -> None:
+                super().__init__()
+                self.project_embedding = project_embedding
+
+            def embed_text(self, text: str, **kwargs: Any) -> List[float]:
+                return self.project_embedding.embed([text])[0]
+
+            async def aembed_text(self, text: str, **kwargs: Any) -> List[float]:
+                return await asyncio.to_thread(self.embed_text, text, **kwargs)
+
+        return ProjectRagasEmbedding()
+
+    @staticmethod
+    def _parse_structured_response(content: str, response_model: Any) -> Any:
+        """Parse a provider response into the Pydantic model requested by Ragas."""
+        text = content.strip()
+        if text.startswith("```"):
+            lines = text.splitlines()
+            if lines and lines[-1].strip().startswith("```"):
+                lines = lines[1:-1]
+            else:
+                lines = lines[1:]
+            text = "\n".join(lines).strip()
+
+        try:
+            payload = json.loads(text)
+        except json.JSONDecodeError:
+            # Some otherwise valid model responses add a short sentence around
+            # the JSON. Extracting the object preserves strict model validation
+            # without inventing any evaluation result.
+            start = text.find("{")
+            end = text.rfind("}")
+            if start < 0 or end <= start:
+                raise ValueError("Ragas judge returned non-JSON structured output")
+            payload = json.loads(text[start : end + 1])
+
+        if hasattr(response_model, "model_validate"):
+            return response_model.model_validate(payload)
+        return response_model.parse_obj(payload)
 
     def _extract_texts(self, chunks: List[Any]) -> List[str]:
         """Extract text strings from various chunk representations.

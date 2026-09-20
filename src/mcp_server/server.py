@@ -8,8 +8,14 @@ while all logs go to stderr.
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
+from contextlib import contextmanager
+from collections.abc import Iterator
+from pathlib import Path
 from typing import TYPE_CHECKING
+
+from dotenv import load_dotenv
 
 from src.mcp_server.protocol_handler import create_mcp_server
 from src.observability.logger import get_logger
@@ -20,6 +26,129 @@ if TYPE_CHECKING:
 
 SERVER_NAME = "modular-rag-mcp-server"
 SERVER_VERSION = "0.1.0"
+
+# ``scripts/evaluate.py`` loads the repository .env explicitly.  The MCP
+# server is launched directly as a subprocess, so it must do the same before
+# any provider is initialized by a tool call.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
+
+class _RawStdioReader:
+    """Async line reader backed by a raw stdio file descriptor.
+
+    The MCP SDK's default ``anyio.wrap_file(TextIOWrapper)`` path does not
+    consume piped stdin reliably in this Python 3.12 subprocess environment.
+    Reading the descriptor directly keeps the transport Stdio while avoiding
+    the buffered text-wrapper interaction.
+    """
+
+    def __init__(self, fd: int) -> None:
+        self._fd = fd
+        self._buffer = b""
+
+    def __aiter__(self) -> "_RawStdioReader":
+        return self
+
+    async def __anext__(self) -> str:
+        line = await self.readline()
+        if not line:
+            raise StopAsyncIteration
+        return line
+
+    async def readline(self) -> str:
+        while b"\n" not in self._buffer:
+            chunk = await self._read_chunk()
+            if not chunk:
+                break
+            self._buffer += chunk
+
+        if b"\n" in self._buffer:
+            line, self._buffer = self._buffer.split(b"\n", 1)
+            return (line + b"\n").decode("utf-8", errors="replace")
+
+        line, self._buffer = self._buffer, b""
+        return line.decode("utf-8", errors="replace")
+
+    async def _read_chunk(self) -> bytes:
+        """Wait for fd readability without a blocking worker-thread read."""
+        loop = asyncio.get_running_loop()
+        ready = loop.create_future()
+
+        def _on_readable() -> None:
+            if ready.done():
+                return
+            try:
+                ready.set_result(os.read(self._fd, 65536))
+            except BaseException as exc:
+                ready.set_exception(exc)
+
+        try:
+            loop.add_reader(self._fd, _on_readable)
+        except (NotImplementedError, RuntimeError):
+            # POSIX/WSL uses add_reader.  Keep a fallback for event loops that
+            # do not expose fd watchers (for example, some Windows loops).
+            return await asyncio.to_thread(os.read, self._fd, 65536)
+
+        try:
+            return await ready
+        finally:
+            loop.remove_reader(self._fd)
+
+    async def aclose(self) -> None:
+        return None
+
+
+class _RawStdioWriter:
+    """Async text writer backed by a raw stdio file descriptor."""
+
+    def __init__(self, fd: int) -> None:
+        self._fd = fd
+
+    async def write(self, data: str) -> int:
+        pending = data.encode("utf-8")
+        total = len(pending)
+        while pending:
+            written = os.write(self._fd, pending)
+            pending = pending[written:]
+        return total
+
+    async def flush(self) -> None:
+        return None
+
+    async def aclose(self) -> None:
+        return None
+
+
+@contextmanager
+def _isolated_stdio_streams() -> Iterator[tuple[_RawStdioReader, _RawStdioWriter]]:
+    """Expose raw Stdio streams and divert accidental fd-level stdout writes.
+
+    The MCP wire keeps the original stdout descriptor.  fd 1 is temporarily
+    pointed at stderr so ordinary ``print`` calls cannot corrupt that wire.
+    """
+    wire_stdin_fd = os.dup(0)
+    wire_stdout_fd = os.dup(1)
+    diverted_stdout_fd = os.dup(2)
+    devnull_fd = os.open(os.devnull, os.O_RDONLY)
+
+    try:
+        os.dup2(devnull_fd, 0)
+        os.dup2(diverted_stdout_fd, 1)
+        yield _RawStdioReader(wire_stdin_fd), _RawStdioWriter(wire_stdout_fd)
+    finally:
+        # Flush while fd 1 still points at stderr; buffered accidental output
+        # must never be released onto the MCP wire after restoration.
+        try:
+            sys.stdout.flush()
+        except (OSError, ValueError):
+            pass
+        os.dup2(wire_stdin_fd, 0)
+        os.dup2(wire_stdout_fd, 1)
+        for fd in (wire_stdin_fd, wire_stdout_fd, diverted_stdout_fd, devnull_fd):
+            try:
+                os.close(fd)
+            except OSError:
+                pass
 
 
 def _redirect_all_loggers_to_stderr() -> None:
@@ -102,12 +231,16 @@ async def run_stdio_server_async() -> int:
     server = create_mcp_server(SERVER_NAME, SERVER_VERSION)
 
     # Run with stdio transport
-    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            server.create_initialization_options(),
-        )
+    with _isolated_stdio_streams() as (stdin_stream, stdout_stream):
+        async with mcp.server.stdio.stdio_server(
+            stdin=stdin_stream,
+            stdout=stdout_stream,
+        ) as (read_stream, write_stream):
+            await server.run(
+                read_stream,
+                write_stream,
+                server.create_initialization_options(),
+            )
 
     logger.info("MCP server shutting down.")
     return 0

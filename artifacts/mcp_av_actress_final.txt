@@ -1,0 +1,606 @@
+=== MCP AV_ACTRESS FINAL BLACK-BOX ACCEPTANCE ===
+cwd=/home/reaper_leviathan/projects/papermind-rag
+client_python=/home/reaper_leviathan/projects/papermind-rag/.venv/bin/python
+transport=stdio; client imports no project modules
+trace_start_line=22
+CLIENT -> {"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"mcp-av-actress-final-client","version":"1.0"}}}
+SERVER <- id=1 elapsed=1.115s {"jsonrpc": "2.0", "id": 1, "result": {"capabilities": {"experimental": {}, "tools": {"listChanged": false}}, "protocolVersion": "2025-06-18", "serverInfo": {"name": "modular-rag-mcp-server", "version": "0.1.0"}}}
+CLIENT -> {"jsonrpc":"2.0","method":"notifications/initialized"}
+CLIENT -> {"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}
+SERVER <- id=2 elapsed=0.001s {"jsonrpc": "2.0", "id": 2, "result": {"tools": [{"description": "Search the knowledge base for relevant documents.\n\nThis tool uses hybrid search (semantic + keyword) to find the most relevant \ndocuments matching your query. Results include source citations for reference.\n\nParameters:\n- query: Your search question or keywords\n- top_k: Maximum number of results (default: 5)\n- collection: Limit search to a specific document collection\n", "inputSchema": {"properties": {"query": {"type": "string", "description": "The search query or question to find relevant documents for."}, "top_k": {"type": "integer", "description": "Maximum number of results to return.", "default": 5, "minimum": 1, "maximum": 20}, "collection": {"type": "string", "description": "Optional collection name to limit the search scope."}}, "required": ["query"], "type": "object"}, "name": "query_knowledge_hub"}, {"description": "List all available document collections in the knowledge base.\n\nReturns information about each collection including:\n- Collection name\n- Document count (if include_stats=true)\n- Collection metadata\n\nUse this tool to discover available collections before querying.\n", "inputSchema": {"properties": {"include_stats": {"type": "boolean", "description": "Whether to include statistics (document count) for each collection.", "default": true}}, "required": [], "type": "object"}, "name": "list_collections"}, {"description": "Get summary and metadata for a specific document.\n\nReturns structured information about a document including:\n- Title (extracted or inferred from content)\n- Summary (first chunk preview or metadata summary)\n- Tags (document-level tags/categories)\n- Source path\n- Chunk count\n\nUse this tool after list_collections to get details about specific documents.\n", "inputSchema": {"properties": {"doc_id": {"type": "string", "description": "The document ID to retrieve summary for. Can be full doc_id (e.g., 'doc_abc123') or the hash portion."}, "collection": {"type": "string", "description": "Collection name to search in. If not specified, searches the default collection."}}, "required": ["doc_id"], "type": "object"}, "name": "get_document_summary"}]}}
+TOOLS_LIST_NAMES=['query_knowledge_hub', 'list_collections', 'get_document_summary']
+CLIENT -> {"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"list_collections","arguments":{"include_stats":true}}}
+SERVER <- id=3 elapsed=0.109s {"jsonrpc": "2.0", "id": 3, "result": {"content": [{"text": "## Available Collections (4 total)\n\n1. **knowledge_hub** - 0 documents\n2. **av_actress** - 56 documents\n3. **demo** - 13 documents\n4. **default** - 0 documents", "type": "text"}], "isError": false}}
+--- LIST_COLLECTIONS TEXT ---
+## Available Collections (4 total)
+
+1. **knowledge_hub** - 0 documents
+2. **av_actress** - 56 documents
+3. **demo** - 13 documents
+4. **default** - 0 documents
+--- LIST_COLLECTIONS JSON ---
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "content": [
+      {
+        "text": "## Available Collections (4 total)\n\n1. **knowledge_hub** - 0 documents\n2. **av_actress** - 56 documents\n3. **demo** - 13 documents\n4. **default** - 0 documents",
+        "type": "text"
+      }
+    ],
+    "isError": false
+  }
+}
+CLIENT -> {"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"query_knowledge_hub","arguments":{"query":"七海蒂娜什么时候成为Madonna专属演员？在此之前经历了哪些主要职业阶段？","collection":"av_actress","top_k":5}}}
+SERVER <- id=4 elapsed=6.132s {"jsonrpc": "2.0", "id": 4, "result": {"content": [{"text": "## 检索结果\n\n针对查询 **\"七海蒂娜什么时候成为Madonna专属演员？在此之前经历了哪些主要职业阶段？\"** 找到 5 条相关结果:\n\n### [1] 结果 1\n**相关度:** 300.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n\n> 七海蒂娜（七海ティナ）公开资料深度研究报告 执行摘要 检索截止：2026年9月2日。本报告以日文一手或近一手资料为优先，包括事务所官方社交媒体、制作/演出方官网、出版物元数据、票务页面与本人公开发言；其次使用日本媒体访谈、行业媒体；日文维基等聚合资料只承担“线索汇总和交叉核对”作用。对于2025—2026年部分成人作品的精确品番、实体/配信日期，由于片商商品页的公开搜索可索引性较差，本报告会明确降低置信度，而不会用中文转载站补齐看似精确、实际不可核验的信息。 七海蒂娜的职业轨迹并非单纯的“AV女优出道—持续拍片”模式，而更接近一条连续转型链：名古屋地下偶像/地方偶像 → 写真艺人 →...\n\n### [2] 结果 2\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n\n> 年份 代表作品 | 发行日期 / 片商 | 类型或主题定位 | 为什么具有代表性 | 来源与可信度 最大意义不在单部销量，而在于她成为 Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据 Madonna Madonna专属第1作；目录索引通常标作JUR-435 | 2025年8月下旬；Madonna | 典型成熟/剧情向专属路线 | 专属身份：Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据 |...\n\n### [3] 结果 3\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n\n> 这是比第三方销量传言准。25 更强的代表性依据 2026年的代表意义是“Madonna阶段延续”，而不是再次换厂。由于当前官方商品持续活跃：Madonna专属 2026年1月下旬；Madonna；JUR系列持续作品；以JUR-615作为可索引样本 JUR-615 成熟剧情、稳定专属期 详情页在公开搜索中索引不足，JUR-615的精确长标题和日期不宜仅凭低质转载过度断言；更可靠的是2026年仍有事务所/Madonna活动和后续宣传迹象 中高；JUR-615元数据：低至中。26 各阶段的“代表性”如何判断...\n\n### [4] 结果 4\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n\n> 2025年Madonna专属化是目前最新的重要商业定位改变。这一结论有事务所官方账号直接背书，而不是根据第三方片单推测。由于Madonna长期以成熟角色、人妻剧情类市场定位见长，七海蒂娜从早年的运动系SODstar新人一路走到Madonna专属，也显示其公众/作品年龄定位正在从“体能型新人”转向“成熟演技型女优”。这里关于定位变化是根据她历次片商与角色类型进行的分析性判断，而非片商正式宣言。\n\n### [5] 结果 5\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n\n> 腹肌、肌肉体操、运动型身体等概念展开，说明制作方主动把“力量型AV女优”作为差异化卖点；这与她现实中参加健身赛事的公开活动相互强化。换言之，七海蒂娜早期的辨识度来自“人设—现实生活方式—作品企划”的高度一致，而不是单靠传统外形宣传。 FALENO阶段则是一轮品牌重构。2020年她离开SODstar并以“电击移籍DEBUT”形式进入FALENOstar；相关生涯资料同时记载她开始让身体从极强肌肉感向更柔和的曲线调整。这意味着她并没有彻底舍弃健身身份，而是在尝试提高角色和作品类型的可塑性。...\n\n\n---\n\n## 引用来源\n\n- [1] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n- [2] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n- [3] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n- [4] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n- [5] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`", "type": "text"}, {"text": "\n---\n**References (JSON):**\n```json\n{\n  \"citations\": [\n    {\n      \"index\": 1,\n      \"chunk_id\": \"76104c3b_0000_a9425196\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\",\n      \"score\": 3.0,\n      \"text_snippet\": \"七海蒂娜（七海ティナ）公开资料深度研究报告 执行摘要...\",\n      \"metadata\": {\n        \"title\": \"七海蒂娜（七海ティナ）职业轨迹与公开资料深度研究报告\",\n        \"chunk_index\": 0,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 2,\n      \"chunk_id\": \"76104c3b_0016_4a74f3ec\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"年份 代表作品 | 发行日期 / 片商 | 类型或主题定位 | 为什么具有代表性 | 来源与可信度 最大意义不在单部销量，而在于她成为 Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据 Madonna Madonna专属第1作；目录索引通常标作JUR-435 | 2025年8月下旬；Madonna...\",\n      \"metadata\": {\n        \"title\": \"七海ティナ成为Madonna专属女优：代表性依据与2026年阶段延续\",\n        \"chunk_index\": 16,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 3,\n      \"chunk_id\": \"76104c3b_0017_132678ae\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"这是比第三方销量传言准。25 更强的代表性依据 2026年的代表意义是“Madonna阶段延续”，而不是再次换厂。由于当前官方商品持续活跃：Madonna专属 2026年1月下旬；Madonna；JUR系列持续作品；以JUR-615作为可索引样本 JUR-615 成熟剧情、稳定专属期...\",\n      \"metadata\": {\n        \"title\": \"七海蒂娜与Madonna阶段代表性分析：JUR-615元数据及人设一致性\",\n        \"chunk_index\": 17,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 4,\n      \"chunk_id\": \"76104c3b_0019_1e6b6b99\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"2025年Madonna专属化是目前最新的重要商业定位改变。这一结论有事务所官方账号直接背书，而不是根据第三方片单推测。由于Madonna长期以成熟角色、人妻剧情类市场定位见长，七海蒂娜从早年的运动系SODstar新人一路走到Madonna专属，也显示其公众/作品年龄定位正在从“体能型新人”转向“成熟演技型女优”。这里关于定位变化是根据她历次片商与角色类型进行的分析性判断，而非片商正式宣言。\",\n      \"metadata\": {\n        \"title\": \"七海蒂娜转投Madonna专属：从运动系新人到成熟演技型女优的定位转变\",\n        \"chunk_index\": 19,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 5,\n      \"chunk_id\": \"76104c3b_0018_0a17aa4c\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"腹肌、肌肉体操、运动型身体等概念展开，说明制作方主动把“力量型AV女优”作为差异化卖点；这与她现实中参加健身赛事的公开活动相互强化。换言之，七海蒂娜早期的辨识度来自“人设—现实生活方式—作品企划”的高度一致，而不是单靠传统外形宣传。...\",\n      \"metadata\": {\n        \"title\": \"七海蒂娜职业阶段演变：从SODstar运动系人设到FALENO、DAHLIA与Madonna专属的品牌重构\",\n        \"chunk_index\": 18,\n        \"doc_type\": \"pdf\"\n      }\n    }\n  ],\n  \"metadata\": {\n    \"query\": \"七海蒂娜什么时候成为Madonna专属演员？在此之前经历了哪些主要职业阶段？\",\n    \"result_count\": 5,\n    \"collection\": \"av_actress\"\n  },\n  \"has_images\": false,\n  \"image_count\": 0\n}\n```", "type": "text"}], "isError": false}}
+--- QUERY_1 TEXT ---
+## 检索结果
+
+针对查询 **"七海蒂娜什么时候成为Madonna专属演员？在此之前经历了哪些主要职业阶段？"** 找到 5 条相关结果:
+
+### [1] 结果 1
+**相关度:** 300.00%
+**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`
+
+> 七海蒂娜（七海ティナ）公开资料深度研究报告 执行摘要 检索截止：2026年9月2日。本报告以日文一手或近一手资料为优先，包括事务所官方社交媒体、制作/演出方官网、出版物元数据、票务页面与本人公开发言；其次使用日本媒体访谈、行业媒体；日文维基等聚合资料只承担“线索汇总和交叉核对”作用。对于2025—2026年部分成人作品的精确品番、实体/配信日期，由于片商商品页的公开搜索可索引性较差，本报告会明确降低置信度，而不会用中文转载站补齐看似精确、实际不可核验的信息。 七海蒂娜的职业轨迹并非单纯的“AV女优出道—持续拍片”模式，而更接近一条连续转型链：名古屋地下偶像/地方偶像 → 写真艺人 →...
+
+### [2] 结果 2
+**相关度:** 200.00%
+**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`
+
+> 年份 代表作品 | 发行日期 / 片商 | 类型或主题定位 | 为什么具有代表性 | 来源与可信度 最大意义不在单部销量，而在于她成为 Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据 Madonna Madonna专属第1作；目录索引通常标作JUR-435 | 2025年8月下旬；Madonna | 典型成熟/剧情向专属路线 | 专属身份：Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据 |...
+
+### [3] 结果 3
+**相关度:** 200.00%
+**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`
+
+> 这是比第三方销量传言准。25 更强的代表性依据 2026年的代表意义是“Madonna阶段延续”，而不是再次换厂。由于当前官方商品持续活跃：Madonna专属 2026年1月下旬；Madonna；JUR系列持续作品；以JUR-615作为可索引样本 JUR-615 成熟剧情、稳定专属期 详情页在公开搜索中索引不足，JUR-615的精确长标题和日期不宜仅凭低质转载过度断言；更可靠的是2026年仍有事务所/Madonna活动和后续宣传迹象 中高；JUR-615元数据：低至中。26 各阶段的“代表性”如何判断...
+
+### [4] 结果 4
+**相关度:** 200.00%
+**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`
+
+> 2025年Madonna专属化是目前最新的重要商业定位改变。这一结论有事务所官方账号直接背书，而不是根据第三方片单推测。由于Madonna长期以成熟角色、人妻剧情类市场定位见长，七海蒂娜从早年的运动系SODstar新人一路走到Madonna专属，也显示其公众/作品年龄定位正在从“体能型新人”转向“成熟演技型女优”。这里关于定位变化是根据她历次片商与角色类型进行的分析性判断，而非片商正式宣言。
+
+### [5] 结果 5
+**相关度:** 200.00%
+**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`
+
+> 腹肌、肌肉体操、运动型身体等概念展开，说明制作方主动把“力量型AV女优”作为差异化卖点；这与她现实中参加健身赛事的公开活动相互强化。换言之，七海蒂娜早期的辨识度来自“人设—现实生活方式—作品企划”的高度一致，而不是单靠传统外形宣传。 FALENO阶段则是一轮品牌重构。2020年她离开SODstar并以“电击移籍DEBUT”形式进入FALENOstar；相关生涯资料同时记载她开始让身体从极强肌肉感向更柔和的曲线调整。这意味着她并没有彻底舍弃健身身份，而是在尝试提高角色和作品类型的可塑性。...
+
+
+---
+
+## 引用来源
+
+- [1] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`
+- [2] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`
+- [3] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`
+- [4] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`
+- [5] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`
+
+---
+**References (JSON):**
+```json
+{
+  "citations": [
+    {
+      "index": 1,
+      "chunk_id": "76104c3b_0000_a9425196",
+      "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf",
+      "score": 3.0,
+      "text_snippet": "七海蒂娜（七海ティナ）公开资料深度研究报告 执行摘要...",
+      "metadata": {
+        "title": "七海蒂娜（七海ティナ）职业轨迹与公开资料深度研究报告",
+        "chunk_index": 0,
+        "doc_type": "pdf"
+      }
+    },
+    {
+      "index": 2,
+      "chunk_id": "76104c3b_0016_4a74f3ec",
+      "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf",
+      "score": 2.0,
+      "text_snippet": "年份 代表作品 | 发行日期 / 片商 | 类型或主题定位 | 为什么具有代表性 | 来源与可信度 最大意义不在单部销量，而在于她成为 Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据 Madonna Madonna专属第1作；目录索引通常标作JUR-435 | 2025年8月下旬；Madonna...",
+      "metadata": {
+        "title": "七海ティナ成为Madonna专属女优：代表性依据与2026年阶段延续",
+        "chunk_index": 16,
+        "doc_type": "pdf"
+      }
+    },
+    {
+      "index": 3,
+      "chunk_id": "76104c3b_0017_132678ae",
+      "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf",
+      "score": 2.0,
+      "text_snippet": "这是比第三方销量传言准。25 更强的代表性依据 2026年的代表意义是“Madonna阶段延续”，而不是再次换厂。由于当前官方商品持续活跃：Madonna专属 2026年1月下旬；Madonna；JUR系列持续作品；以JUR-615作为可索引样本 JUR-615 成熟剧情、稳定专属期...",
+      "metadata": {
+        "title": "七海蒂娜与Madonna阶段代表性分析：JUR-615元数据及人设一致性",
+        "chunk_index": 17,
+        "doc_type": "pdf"
+      }
+    },
+    {
+      "index": 4,
+      "chunk_id": "76104c3b_0019_1e6b6b99",
+      "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf",
+      "score": 2.0,
+      "text_snippet": "2025年Madonna专属化是目前最新的重要商业定位改变。这一结论有事务所官方账号直接背书，而不是根据第三方片单推测。由于Madonna长期以成熟角色、人妻剧情类市场定位见长，七海蒂娜从早年的运动系SODstar新人一路走到Madonna专属，也显示其公众/作品年龄定位正在从“体能型新人”转向“成熟演技型女优”。这里关于定位变化是根据她历次片商与角色类型进行的分析性判断，而非片商正式宣言。",
+      "metadata": {
+        "title": "七海蒂娜转投Madonna专属：从运动系新人到成熟演技型女优的定位转变",
+        "chunk_index": 19,
+        "doc_type": "pdf"
+      }
+    },
+    {
+      "index": 5,
+      "chunk_id": "76104c3b_0018_0a17aa4c",
+      "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf",
+      "score": 2.0,
+      "text_snippet": "腹肌、肌肉体操、运动型身体等概念展开，说明制作方主动把“力量型AV女优”作为差异化卖点；这与她现实中参加健身赛事的公开活动相互强化。换言之，七海蒂娜早期的辨识度来自“人设—现实生活方式—作品企划”的高度一致，而不是单靠传统外形宣传。...",
+      "metadata": {
+        "title": "七海蒂娜职业阶段演变：从SODstar运动系人设到FALENO、DAHLIA与Madonna专属的品牌重构",
+        "chunk_index": 18,
+        "doc_type": "pdf"
+      }
+    }
+  ],
+  "metadata": {
+    "query": "七海蒂娜什么时候成为Madonna专属演员？在此之前经历了哪些主要职业阶段？",
+    "result_count": 5,
+    "collection": "av_actress"
+  },
+  "has_images": false,
+  "image_count": 0
+}
+```
+--- QUERY_1 JSON ---
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "result": {
+    "content": [
+      {
+        "text": "## 检索结果\n\n针对查询 **\"七海蒂娜什么时候成为Madonna专属演员？在此之前经历了哪些主要职业阶段？\"** 找到 5 条相关结果:\n\n### [1] 结果 1\n**相关度:** 300.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n\n> 七海蒂娜（七海ティナ）公开资料深度研究报告 执行摘要 检索截止：2026年9月2日。本报告以日文一手或近一手资料为优先，包括事务所官方社交媒体、制作/演出方官网、出版物元数据、票务页面与本人公开发言；其次使用日本媒体访谈、行业媒体；日文维基等聚合资料只承担“线索汇总和交叉核对”作用。对于2025—2026年部分成人作品的精确品番、实体/配信日期，由于片商商品页的公开搜索可索引性较差，本报告会明确降低置信度，而不会用中文转载站补齐看似精确、实际不可核验的信息。 七海蒂娜的职业轨迹并非单纯的“AV女优出道—持续拍片”模式，而更接近一条连续转型链：名古屋地下偶像/地方偶像 → 写真艺人 →...\n\n### [2] 结果 2\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n\n> 年份 代表作品 | 发行日期 / 片商 | 类型或主题定位 | 为什么具有代表性 | 来源与可信度 最大意义不在单部销量，而在于她成为 Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据 Madonna Madonna专属第1作；目录索引通常标作JUR-435 | 2025年8月下旬；Madonna | 典型成熟/剧情向专属路线 | 专属身份：Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据 |...\n\n### [3] 结果 3\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n\n> 这是比第三方销量传言准。25 更强的代表性依据 2026年的代表意义是“Madonna阶段延续”，而不是再次换厂。由于当前官方商品持续活跃：Madonna专属 2026年1月下旬；Madonna；JUR系列持续作品；以JUR-615作为可索引样本 JUR-615 成熟剧情、稳定专属期 详情页在公开搜索中索引不足，JUR-615的精确长标题和日期不宜仅凭低质转载过度断言；更可靠的是2026年仍有事务所/Madonna活动和后续宣传迹象 中高；JUR-615元数据：低至中。26 各阶段的“代表性”如何判断...\n\n### [4] 结果 4\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n\n> 2025年Madonna专属化是目前最新的重要商业定位改变。这一结论有事务所官方账号直接背书，而不是根据第三方片单推测。由于Madonna长期以成熟角色、人妻剧情类市场定位见长，七海蒂娜从早年的运动系SODstar新人一路走到Madonna专属，也显示其公众/作品年龄定位正在从“体能型新人”转向“成熟演技型女优”。这里关于定位变化是根据她历次片商与角色类型进行的分析性判断，而非片商正式宣言。\n\n### [5] 结果 5\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n\n> 腹肌、肌肉体操、运动型身体等概念展开，说明制作方主动把“力量型AV女优”作为差异化卖点；这与她现实中参加健身赛事的公开活动相互强化。换言之，七海蒂娜早期的辨识度来自“人设—现实生活方式—作品企划”的高度一致，而不是单靠传统外形宣传。 FALENO阶段则是一轮品牌重构。2020年她离开SODstar并以“电击移籍DEBUT”形式进入FALENOstar；相关生涯资料同时记载她开始让身体从极强肌肉感向更柔和的曲线调整。这意味着她并没有彻底舍弃健身身份，而是在尝试提高角色和作品类型的可塑性。...\n\n\n---\n\n## 引用来源\n\n- [1] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n- [2] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n- [3] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n- [4] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`\n- [5] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf`",
+        "type": "text"
+      },
+      {
+        "text": "\n---\n**References (JSON):**\n```json\n{\n  \"citations\": [\n    {\n      \"index\": 1,\n      \"chunk_id\": \"76104c3b_0000_a9425196\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\",\n      \"score\": 3.0,\n      \"text_snippet\": \"七海蒂娜（七海ティナ）公开资料深度研究报告 执行摘要...\",\n      \"metadata\": {\n        \"title\": \"七海蒂娜（七海ティナ）职业轨迹与公开资料深度研究报告\",\n        \"chunk_index\": 0,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 2,\n      \"chunk_id\": \"76104c3b_0016_4a74f3ec\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"年份 代表作品 | 发行日期 / 片商 | 类型或主题定位 | 为什么具有代表性 | 来源与可信度 最大意义不在单部销量，而在于她成为 Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据 Madonna Madonna专属第1作；目录索引通常标作JUR-435 | 2025年8月下旬；Madonna...\",\n      \"metadata\": {\n        \"title\": \"七海ティナ成为Madonna专属女优：代表性依据与2026年阶段延续\",\n        \"chunk_index\": 16,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 3,\n      \"chunk_id\": \"76104c3b_0017_132678ae\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"这是比第三方销量传言准。25 更强的代表性依据 2026年的代表意义是“Madonna阶段延续”，而不是再次换厂。由于当前官方商品持续活跃：Madonna专属 2026年1月下旬；Madonna；JUR系列持续作品；以JUR-615作为可索引样本 JUR-615 成熟剧情、稳定专属期...\",\n      \"metadata\": {\n        \"title\": \"七海蒂娜与Madonna阶段代表性分析：JUR-615元数据及人设一致性\",\n        \"chunk_index\": 17,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 4,\n      \"chunk_id\": \"76104c3b_0019_1e6b6b99\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"2025年Madonna专属化是目前最新的重要商业定位改变。这一结论有事务所官方账号直接背书，而不是根据第三方片单推测。由于Madonna长期以成熟角色、人妻剧情类市场定位见长，七海蒂娜从早年的运动系SODstar新人一路走到Madonna专属，也显示其公众/作品年龄定位正在从“体能型新人”转向“成熟演技型女优”。这里关于定位变化是根据她历次片商与角色类型进行的分析性判断，而非片商正式宣言。\",\n      \"metadata\": {\n        \"title\": \"七海蒂娜转投Madonna专属：从运动系新人到成熟演技型女优的定位转变\",\n        \"chunk_index\": 19,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 5,\n      \"chunk_id\": \"76104c3b_0018_0a17aa4c\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"腹肌、肌肉体操、运动型身体等概念展开，说明制作方主动把“力量型AV女优”作为差异化卖点；这与她现实中参加健身赛事的公开活动相互强化。换言之，七海蒂娜早期的辨识度来自“人设—现实生活方式—作品企划”的高度一致，而不是单靠传统外形宣传。...\",\n      \"metadata\": {\n        \"title\": \"七海蒂娜职业阶段演变：从SODstar运动系人设到FALENO、DAHLIA与Madonna专属的品牌重构\",\n        \"chunk_index\": 18,\n        \"doc_type\": \"pdf\"\n      }\n    }\n  ],\n  \"metadata\": {\n    \"query\": \"七海蒂娜什么时候成为Madonna专属演员？在此之前经历了哪些主要职业阶段？\",\n    \"result_count\": 5,\n    \"collection\": \"av_actress\"\n  },\n  \"has_images\": false,\n  \"image_count\": 0\n}\n```",
+        "type": "text"
+      }
+    ],
+    "isError": false
+  }
+}
+QUERY_1_SOURCES=['/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf']
+QUERY_1_DOC_IDS=['76104c3b']
+CLIENT -> {"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"query_knowledge_hub","arguments":{"query":"佐々木咲和以前使用过哪些艺名？什么时候开始使用现在的艺名？","collection":"av_actress","top_k":5}}}
+SERVER <- id=5 elapsed=5.059s {"jsonrpc": "2.0", "id": 5, "result": {"content": [{"text": "## 检索结果\n\n针对查询 **\"佐々木咲和以前使用过哪些艺名？什么时候开始使用现在的艺名？\"** 找到 5 条相关结果:\n\n### [1] 结果 1\n**相关度:** 300.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n\n> 照片方面，我没有找到明确采用CC、公共领域或其他自由许可的近期佐々木咲和照片。可核验度最高的一张近期新闻照片来自《日刊スポーツ》2024年3月16日AV新法相关活动，由村上幸将拍摄；该网站明确声明其文章、照片等版权归日刊スポーツNEWS所有，并禁止转载，故这不是自由许可图片。本报告不重新复制该新闻原图，只提供照片页作为“截图/照片参考”。文首图片为公开网页的搜索预览，仅作人物识别辅助，其原网页没有给出自由许可声明，不得视为可自由再利用图片。 身份辨析、个人资料与照片 姓名、年龄与身体资料 日文资料直接标注其读音为ささき さわ，因此罗马字通常写作 Sasaki Sawa，不是“Sasaki...\n\n### [2] 结果 2\n**相关度:** 300.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n\n> 佐々木咲和（Sasaki Sawa）深度研究报告 执行摘要 身份结论。 用户所写的“Sasaki Sakiwa?”应校正为 Sasaki Sawa（ささき・さわ，佐々木咲和）。现有资料显示，她是同一名AV演员在不同职业阶段使用的艺名体系之一：2012年以“大崎美佳”出道，2014年末引退；2018年以“黛ユイ”重新建立公开账号，2019年恢复AV活动；2021年转籍后改用现名“佐々木咲和”；2023年又转至HANAYA PROJECT。其法定/本名没有可靠公开资料，因此应记为“未公开”，不能把“大崎美佳”“黛ユイ”等艺名当作本名。 1...\n\n### [3] 结果 3\n**相关度:** 300.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n\n> 读音 罗马 由官方日文读音直接转写；“Sakiwa”不符合公 Sasaki Sawa 当前 字 开读音。 1 法定/ 没有找到本人、事务所或可信媒体披露本名的记 真实 未公开 截至2026-09-02 录；旧艺名不能推定为本名。 1 姓名 旧艺 2012以大崎美佳出道；2018以黛ユイ恢复公开 大崎美佳、黛ユイ 2012；2018–2021 名 活动。 1 日文资料如此记载；低质量中文聚合页的页头出 出生 1992-02-22 持续公开资料 现1991-11-30、正文却又写1992-02-22，属于内 日期 部矛盾，因此弃用前者。 6 当前...\n\n### [4] 结果 4\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n\n> Reserved；非CC、非公共领域、禁止未经授权转载。 5 照片参考页： https://www.nikkansports.com/entertainment/photonews/photonews_nsInc_202403160001173-2.html 由于没有检索到明确自由许可的近期人像，法律上更稳妥的处理是引用新闻照片页而不重新托管或截取原图。 文首网页图片预览的原站未声明CC等再利用授权，因此同样不应下载后二次发布或用于商业宣传。 职业轨迹与年度代表作 职业阶段...\n\n### [5] 结果 5\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n\n> 年度 代表作品 / 发行记录 日期 厂牌 / 发行方 为什么具有代表性 公开目录记录该年有SOD Create的3DSVR-0634；完整标题未从高质量公开来源可靠核验。VR类发行。它的代表性在于显示SODクリエイト2019复出并非一次性事件，而延续到下一年度；不对销量或口碑作无证据推断。13 2021年3月改为“佐々木咲和”后，目录在9月至12月连续出现DNJR-00058；完整标题未可靠核验。2021-09-14 犬／妄想族。多个发行品番，因此该条可作为现艺名阶段重新建立稳定发行轨迹的代表记录。6...\n\n\n---\n\n## 引用来源\n\n- [1] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n- [2] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n- [3] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n- [4] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n- [5] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`", "type": "text"}, {"text": "\n---\n**References (JSON):**\n```json\n{\n  \"citations\": [\n    {\n      \"index\": 1,\n      \"chunk_id\": \"60dd2dfb_0002_e25c114f\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf\",\n      \"score\": 3.0,\n      \"text_snippet\": \"照片方面，我没有找到明确采用CC、公共领域或其他自由许可的近期佐々木咲和照片。可核验度最高的一张近期新闻照片来自《日刊スポーツ》2024年3月16日AV新法相关活动，由村上幸将拍摄；该网站明确声明其文章、照片等版权归日刊スポーツNEWS所有，并禁止转载，故这不是自由许可图片。本报告不重新复制该新闻原图，只提供照片页作为“截图/照片参考”。文首图片为公开网页的搜索预览，仅作人物识别辅助，其原网页没有...\",\n      \"metadata\": {\n        \"title\": \"佐々木咲和照片版权与身份资料核验：无自由许可近期照片，确认艺名读音与罗马字\",\n        \"chunk_index\": 2,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 2,\n      \"chunk_id\": \"60dd2dfb_0000_27c6ab58\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf\",\n      \"score\": 3.0,\n      \"text_snippet\": \"佐々木咲和（Sasaki Sawa）深度研究报告 执行摘要 身份结论。 用户所写的“Sasaki Sakiwa?”应校正为 Sasaki...\",\n      \"metadata\": {\n        \"title\": \"佐々木咲和（Sasaki Sawa）深度研究报告：艺名沿革、职业韧性与作品研究限制\",\n        \"chunk_index\": 0,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 3,\n      \"chunk_id\": \"60dd2dfb_0003_f54a1346\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf\",\n      \"score\": 3.0,\n      \"text_snippet\": \"读音 罗马 由官方日文读音直接转写；“Sakiwa”不符合公 Sasaki Sawa 当前 字 开读音。 1 法定/ 没有找到本人、事务所或可信媒体披露本名的记 真实 未公开 截至2026-09-02 录；旧艺名不能推定为本名。 1 姓名 旧艺 2012以大崎美佳出道；2018以黛ユイ恢复公开 大崎美佳、黛ユイ 2012；2018–2021 名 活动。 1...\",\n      \"metadata\": {\n        \"title\": \"Sasaki Sawa Metadata: Name, Birth Date, Age, and Physical Details Verification\",\n        \"chunk_index\": 3,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 4,\n      \"chunk_id\": \"60dd2dfb_0006_3e84d5b5\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"Reserved；非CC、非公共领域、禁止未经授权转载。 5 照片参考页： https://www.nikkansports.com/entertainment/photonews/photonews_nsInc_202403160001173-2.html 由于没有检索到明确自由许可的近期人像，法律上更稳妥的处理是引用新闻照片页而不重新托管或截取原图。...\",\n      \"metadata\": {\n        \"title\": \"佐々木咲和职业轨迹与照片版权说明：从大崎美佳到HANAYA PROJECT\",\n        \"chunk_index\": 6,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 5,\n      \"chunk_id\": \"60dd2dfb_0010_87575055\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"年度 代表作品 / 发行记录 日期 厂牌 / 发行方 为什么具有代表性 公开目录记录该年有SOD Create的3DSVR-0634；完整标题未从高质量公开来源可靠核验。VR类发行。它的代表性在于显示SODクリエイト2019复出并非一次性事件，而延续到下一年度；不对销量或口碑作无证据推断。13...\",\n      \"metadata\": {\n        \"title\": \"佐々木咲和发行记录与职业轨迹：2019–2025年多厂牌作品及公共活动演变\",\n        \"chunk_index\": 10,\n        \"doc_type\": \"pdf\"\n      }\n    }\n  ],\n  \"metadata\": {\n    \"query\": \"佐々木咲和以前使用过哪些艺名？什么时候开始使用现在的艺名？\",\n    \"result_count\": 5,\n    \"collection\": \"av_actress\"\n  },\n  \"has_images\": false,\n  \"image_count\": 0\n}\n```", "type": "text"}], "isError": false}}
+--- QUERY_2 TEXT ---
+## 检索结果
+
+针对查询 **"佐々木咲和以前使用过哪些艺名？什么时候开始使用现在的艺名？"** 找到 5 条相关结果:
+
+### [1] 结果 1
+**相关度:** 300.00%
+**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`
+
+> 照片方面，我没有找到明确采用CC、公共领域或其他自由许可的近期佐々木咲和照片。可核验度最高的一张近期新闻照片来自《日刊スポーツ》2024年3月16日AV新法相关活动，由村上幸将拍摄；该网站明确声明其文章、照片等版权归日刊スポーツNEWS所有，并禁止转载，故这不是自由许可图片。本报告不重新复制该新闻原图，只提供照片页作为“截图/照片参考”。文首图片为公开网页的搜索预览，仅作人物识别辅助，其原网页没有给出自由许可声明，不得视为可自由再利用图片。 身份辨析、个人资料与照片 姓名、年龄与身体资料 日文资料直接标注其读音为ささき さわ，因此罗马字通常写作 Sasaki Sawa，不是“Sasaki...
+
+### [2] 结果 2
+**相关度:** 300.00%
+**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`
+
+> 佐々木咲和（Sasaki Sawa）深度研究报告 执行摘要 身份结论。 用户所写的“Sasaki Sakiwa?”应校正为 Sasaki Sawa（ささき・さわ，佐々木咲和）。现有资料显示，她是同一名AV演员在不同职业阶段使用的艺名体系之一：2012年以“大崎美佳”出道，2014年末引退；2018年以“黛ユイ”重新建立公开账号，2019年恢复AV活动；2021年转籍后改用现名“佐々木咲和”；2023年又转至HANAYA PROJECT。其法定/本名没有可靠公开资料，因此应记为“未公开”，不能把“大崎美佳”“黛ユイ”等艺名当作本名。 1...
+
+### [3] 结果 3
+**相关度:** 300.00%
+**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`
+
+> 读音 罗马 由官方日文读音直接转写；“Sakiwa”不符合公 Sasaki Sawa 当前 字 开读音。 1 法定/ 没有找到本人、事务所或可信媒体披露本名的记 真实 未公开 截至2026-09-02 录；旧艺名不能推定为本名。 1 姓名 旧艺 2012以大崎美佳出道；2018以黛ユイ恢复公开 大崎美佳、黛ユイ 2012；2018–2021 名 活动。 1 日文资料如此记载；低质量中文聚合页的页头出 出生 1992-02-22 持续公开资料 现1991-11-30、正文却又写1992-02-22，属于内 日期 部矛盾，因此弃用前者。 6 当前...
+
+### [4] 结果 4
+**相关度:** 200.00%
+**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`
+
+> Reserved；非CC、非公共领域、禁止未经授权转载。 5 照片参考页： https://www.nikkansports.com/entertainment/photonews/photonews_nsInc_202403160001173-2.html 由于没有检索到明确自由许可的近期人像，法律上更稳妥的处理是引用新闻照片页而不重新托管或截取原图。 文首网页图片预览的原站未声明CC等再利用授权，因此同样不应下载后二次发布或用于商业宣传。 职业轨迹与年度代表作 职业阶段...
+
+### [5] 结果 5
+**相关度:** 200.00%
+**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`
+
+> 年度 代表作品 / 发行记录 日期 厂牌 / 发行方 为什么具有代表性 公开目录记录该年有SOD Create的3DSVR-0634；完整标题未从高质量公开来源可靠核验。VR类发行。它的代表性在于显示SODクリエイト2019复出并非一次性事件，而延续到下一年度；不对销量或口碑作无证据推断。13 2021年3月改为“佐々木咲和”后，目录在9月至12月连续出现DNJR-00058；完整标题未可靠核验。2021-09-14 犬／妄想族。多个发行品番，因此该条可作为现艺名阶段重新建立稳定发行轨迹的代表记录。6...
+
+
+---
+
+## 引用来源
+
+- [1] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`
+- [2] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`
+- [3] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`
+- [4] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`
+- [5] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`
+
+---
+**References (JSON):**
+```json
+{
+  "citations": [
+    {
+      "index": 1,
+      "chunk_id": "60dd2dfb_0002_e25c114f",
+      "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf",
+      "score": 3.0,
+      "text_snippet": "照片方面，我没有找到明确采用CC、公共领域或其他自由许可的近期佐々木咲和照片。可核验度最高的一张近期新闻照片来自《日刊スポーツ》2024年3月16日AV新法相关活动，由村上幸将拍摄；该网站明确声明其文章、照片等版权归日刊スポーツNEWS所有，并禁止转载，故这不是自由许可图片。本报告不重新复制该新闻原图，只提供照片页作为“截图/照片参考”。文首图片为公开网页的搜索预览，仅作人物识别辅助，其原网页没有...",
+      "metadata": {
+        "title": "佐々木咲和照片版权与身份资料核验：无自由许可近期照片，确认艺名读音与罗马字",
+        "chunk_index": 2,
+        "doc_type": "pdf"
+      }
+    },
+    {
+      "index": 2,
+      "chunk_id": "60dd2dfb_0000_27c6ab58",
+      "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf",
+      "score": 3.0,
+      "text_snippet": "佐々木咲和（Sasaki Sawa）深度研究报告 执行摘要 身份结论。 用户所写的“Sasaki Sakiwa?”应校正为 Sasaki...",
+      "metadata": {
+        "title": "佐々木咲和（Sasaki Sawa）深度研究报告：艺名沿革、职业韧性与作品研究限制",
+        "chunk_index": 0,
+        "doc_type": "pdf"
+      }
+    },
+    {
+      "index": 3,
+      "chunk_id": "60dd2dfb_0003_f54a1346",
+      "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf",
+      "score": 3.0,
+      "text_snippet": "读音 罗马 由官方日文读音直接转写；“Sakiwa”不符合公 Sasaki Sawa 当前 字 开读音。 1 法定/ 没有找到本人、事务所或可信媒体披露本名的记 真实 未公开 截至2026-09-02 录；旧艺名不能推定为本名。 1 姓名 旧艺 2012以大崎美佳出道；2018以黛ユイ恢复公开 大崎美佳、黛ユイ 2012；2018–2021 名 活动。 1...",
+      "metadata": {
+        "title": "Sasaki Sawa Metadata: Name, Birth Date, Age, and Physical Details Verification",
+        "chunk_index": 3,
+        "doc_type": "pdf"
+      }
+    },
+    {
+      "index": 4,
+      "chunk_id": "60dd2dfb_0006_3e84d5b5",
+      "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf",
+      "score": 2.0,
+      "text_snippet": "Reserved；非CC、非公共领域、禁止未经授权转载。 5 照片参考页： https://www.nikkansports.com/entertainment/photonews/photonews_nsInc_202403160001173-2.html 由于没有检索到明确自由许可的近期人像，法律上更稳妥的处理是引用新闻照片页而不重新托管或截取原图。...",
+      "metadata": {
+        "title": "佐々木咲和职业轨迹与照片版权说明：从大崎美佳到HANAYA PROJECT",
+        "chunk_index": 6,
+        "doc_type": "pdf"
+      }
+    },
+    {
+      "index": 5,
+      "chunk_id": "60dd2dfb_0010_87575055",
+      "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf",
+      "score": 2.0,
+      "text_snippet": "年度 代表作品 / 发行记录 日期 厂牌 / 发行方 为什么具有代表性 公开目录记录该年有SOD Create的3DSVR-0634；完整标题未从高质量公开来源可靠核验。VR类发行。它的代表性在于显示SODクリエイト2019复出并非一次性事件，而延续到下一年度；不对销量或口碑作无证据推断。13...",
+      "metadata": {
+        "title": "佐々木咲和发行记录与职业轨迹：2019–2025年多厂牌作品及公共活动演变",
+        "chunk_index": 10,
+        "doc_type": "pdf"
+      }
+    }
+  ],
+  "metadata": {
+    "query": "佐々木咲和以前使用过哪些艺名？什么时候开始使用现在的艺名？",
+    "result_count": 5,
+    "collection": "av_actress"
+  },
+  "has_images": false,
+  "image_count": 0
+}
+```
+--- QUERY_2 JSON ---
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "result": {
+    "content": [
+      {
+        "text": "## 检索结果\n\n针对查询 **\"佐々木咲和以前使用过哪些艺名？什么时候开始使用现在的艺名？\"** 找到 5 条相关结果:\n\n### [1] 结果 1\n**相关度:** 300.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n\n> 照片方面，我没有找到明确采用CC、公共领域或其他自由许可的近期佐々木咲和照片。可核验度最高的一张近期新闻照片来自《日刊スポーツ》2024年3月16日AV新法相关活动，由村上幸将拍摄；该网站明确声明其文章、照片等版权归日刊スポーツNEWS所有，并禁止转载，故这不是自由许可图片。本报告不重新复制该新闻原图，只提供照片页作为“截图/照片参考”。文首图片为公开网页的搜索预览，仅作人物识别辅助，其原网页没有给出自由许可声明，不得视为可自由再利用图片。 身份辨析、个人资料与照片 姓名、年龄与身体资料 日文资料直接标注其读音为ささき さわ，因此罗马字通常写作 Sasaki Sawa，不是“Sasaki...\n\n### [2] 结果 2\n**相关度:** 300.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n\n> 佐々木咲和（Sasaki Sawa）深度研究报告 执行摘要 身份结论。 用户所写的“Sasaki Sakiwa?”应校正为 Sasaki Sawa（ささき・さわ，佐々木咲和）。现有资料显示，她是同一名AV演员在不同职业阶段使用的艺名体系之一：2012年以“大崎美佳”出道，2014年末引退；2018年以“黛ユイ”重新建立公开账号，2019年恢复AV活动；2021年转籍后改用现名“佐々木咲和”；2023年又转至HANAYA PROJECT。其法定/本名没有可靠公开资料，因此应记为“未公开”，不能把“大崎美佳”“黛ユイ”等艺名当作本名。 1...\n\n### [3] 结果 3\n**相关度:** 300.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n\n> 读音 罗马 由官方日文读音直接转写；“Sakiwa”不符合公 Sasaki Sawa 当前 字 开读音。 1 法定/ 没有找到本人、事务所或可信媒体披露本名的记 真实 未公开 截至2026-09-02 录；旧艺名不能推定为本名。 1 姓名 旧艺 2012以大崎美佳出道；2018以黛ユイ恢复公开 大崎美佳、黛ユイ 2012；2018–2021 名 活动。 1 日文资料如此记载；低质量中文聚合页的页头出 出生 1992-02-22 持续公开资料 现1991-11-30、正文却又写1992-02-22，属于内 日期 部矛盾，因此弃用前者。 6 当前...\n\n### [4] 结果 4\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n\n> Reserved；非CC、非公共领域、禁止未经授权转载。 5 照片参考页： https://www.nikkansports.com/entertainment/photonews/photonews_nsInc_202403160001173-2.html 由于没有检索到明确自由许可的近期人像，法律上更稳妥的处理是引用新闻照片页而不重新托管或截取原图。 文首网页图片预览的原站未声明CC等再利用授权，因此同样不应下载后二次发布或用于商业宣传。 职业轨迹与年度代表作 职业阶段...\n\n### [5] 结果 5\n**相关度:** 200.00%\n**来源:** `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n\n> 年度 代表作品 / 发行记录 日期 厂牌 / 发行方 为什么具有代表性 公开目录记录该年有SOD Create的3DSVR-0634；完整标题未从高质量公开来源可靠核验。VR类发行。它的代表性在于显示SODクリエイト2019复出并非一次性事件，而延续到下一年度；不对销量或口碑作无证据推断。13 2021年3月改为“佐々木咲和”后，目录在9月至12月连续出现DNJR-00058；完整标题未可靠核验。2021-09-14 犬／妄想族。多个发行品番，因此该条可作为现艺名阶段重新建立稳定发行轨迹的代表记录。6...\n\n\n---\n\n## 引用来源\n\n- [1] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n- [2] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n- [3] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n- [4] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`\n- [5] `/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf`",
+        "type": "text"
+      },
+      {
+        "text": "\n---\n**References (JSON):**\n```json\n{\n  \"citations\": [\n    {\n      \"index\": 1,\n      \"chunk_id\": \"60dd2dfb_0002_e25c114f\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf\",\n      \"score\": 3.0,\n      \"text_snippet\": \"照片方面，我没有找到明确采用CC、公共领域或其他自由许可的近期佐々木咲和照片。可核验度最高的一张近期新闻照片来自《日刊スポーツ》2024年3月16日AV新法相关活动，由村上幸将拍摄；该网站明确声明其文章、照片等版权归日刊スポーツNEWS所有，并禁止转载，故这不是自由许可图片。本报告不重新复制该新闻原图，只提供照片页作为“截图/照片参考”。文首图片为公开网页的搜索预览，仅作人物识别辅助，其原网页没有...\",\n      \"metadata\": {\n        \"title\": \"佐々木咲和照片版权与身份资料核验：无自由许可近期照片，确认艺名读音与罗马字\",\n        \"chunk_index\": 2,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 2,\n      \"chunk_id\": \"60dd2dfb_0000_27c6ab58\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf\",\n      \"score\": 3.0,\n      \"text_snippet\": \"佐々木咲和（Sasaki Sawa）深度研究报告 执行摘要 身份结论。 用户所写的“Sasaki Sakiwa?”应校正为 Sasaki...\",\n      \"metadata\": {\n        \"title\": \"佐々木咲和（Sasaki Sawa）深度研究报告：艺名沿革、职业韧性与作品研究限制\",\n        \"chunk_index\": 0,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 3,\n      \"chunk_id\": \"60dd2dfb_0003_f54a1346\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf\",\n      \"score\": 3.0,\n      \"text_snippet\": \"读音 罗马 由官方日文读音直接转写；“Sakiwa”不符合公 Sasaki Sawa 当前 字 开读音。 1 法定/ 没有找到本人、事务所或可信媒体披露本名的记 真实 未公开 截至2026-09-02 录；旧艺名不能推定为本名。 1 姓名 旧艺 2012以大崎美佳出道；2018以黛ユイ恢复公开 大崎美佳、黛ユイ 2012；2018–2021 名 活动。 1...\",\n      \"metadata\": {\n        \"title\": \"Sasaki Sawa Metadata: Name, Birth Date, Age, and Physical Details Verification\",\n        \"chunk_index\": 3,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 4,\n      \"chunk_id\": \"60dd2dfb_0006_3e84d5b5\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"Reserved；非CC、非公共领域、禁止未经授权转载。 5 照片参考页： https://www.nikkansports.com/entertainment/photonews/photonews_nsInc_202403160001173-2.html 由于没有检索到明确自由许可的近期人像，法律上更稳妥的处理是引用新闻照片页而不重新托管或截取原图。...\",\n      \"metadata\": {\n        \"title\": \"佐々木咲和职业轨迹与照片版权说明：从大崎美佳到HANAYA PROJECT\",\n        \"chunk_index\": 6,\n        \"doc_type\": \"pdf\"\n      }\n    },\n    {\n      \"index\": 5,\n      \"chunk_id\": \"60dd2dfb_0010_87575055\",\n      \"source\": \"/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf\",\n      \"score\": 2.0,\n      \"text_snippet\": \"年度 代表作品 / 发行记录 日期 厂牌 / 发行方 为什么具有代表性 公开目录记录该年有SOD Create的3DSVR-0634；完整标题未从高质量公开来源可靠核验。VR类发行。它的代表性在于显示SODクリエイト2019复出并非一次性事件，而延续到下一年度；不对销量或口碑作无证据推断。13...\",\n      \"metadata\": {\n        \"title\": \"佐々木咲和发行记录与职业轨迹：2019–2025年多厂牌作品及公共活动演变\",\n        \"chunk_index\": 10,\n        \"doc_type\": \"pdf\"\n      }\n    }\n  ],\n  \"metadata\": {\n    \"query\": \"佐々木咲和以前使用过哪些艺名？什么时候开始使用现在的艺名？\",\n    \"result_count\": 5,\n    \"collection\": \"av_actress\"\n  },\n  \"has_images\": false,\n  \"image_count\": 0\n}\n```",
+        "type": "text"
+      }
+    ],
+    "isError": false
+  }
+}
+QUERY_2_SOURCES=['/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf']
+QUERY_2_DOC_IDS=['60dd2dfb']
+CLIENT -> {"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"get_document_summary","arguments":{"doc_id":"76104c3b","collection":"av_actress"}}}
+SERVER <- id=6 elapsed=0.013s {"jsonrpc": "2.0", "id": 6, "result": {"content": [{"text": "## Document: 七海蒂娜（七海ティナ）职业轨迹与公开资料深度研究报告\n\n**Document ID:** `76104c3b`\n**Source:** /home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\n**Chunks:** 35\n**Tags:** `七海蒂娜`, `七海ティナ`, `AV女优`, `职业轨迹`, `SODstar`, `FALENOstar`, `DAHLIA`, `Attackers`, `Madonna`, `身体改造`, `复归`, `健康暂停`, `爱知县丰桥市`, `恵比寿マスカッツ`, `PDF`\n\n### Summary\n\n本报告基于日文一手资料，梳理七海蒂娜从名古屋地下偶像、写真艺人、恵比寿マスカッツ成员到SODstar、FALENOstar、DAHLIA、Attackers及Madonna专属女优的连续转型链，并记录其因健康原因暂停与2024年复归的经过。报告同时核对了其生日、出生地、身高、三围等身份信息，并强调对2025—2026年作品细节及体重数据需降低置信度。\n\n### Additional Metadata\n\n- **image_refs:** \n- **doc_hash:** 2815821a4bd97e240c78ebab2983c652f71bb52968d08f0b8c2b57522ff4428d\n- **enriched_by:** llm\n- **refined_by:** llm\n- **chunk_id:** 76104c3b_0000_a9425196\n- **doc_type:** pdf", "type": "text"}], "isError": false}}
+--- DOCUMENT_SUMMARY doc_id=76104c3b TEXT ---
+## Document: 七海蒂娜（七海ティナ）职业轨迹与公开资料深度研究报告
+
+**Document ID:** `76104c3b`
+**Source:** /home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf
+**Chunks:** 35
+**Tags:** `七海蒂娜`, `七海ティナ`, `AV女优`, `职业轨迹`, `SODstar`, `FALENOstar`, `DAHLIA`, `Attackers`, `Madonna`, `身体改造`, `复归`, `健康暂停`, `爱知县丰桥市`, `恵比寿マスカッツ`, `PDF`
+
+### Summary
+
+本报告基于日文一手资料，梳理七海蒂娜从名古屋地下偶像、写真艺人、恵比寿マスカッツ成员到SODstar、FALENOstar、DAHLIA、Attackers及Madonna专属女优的连续转型链，并记录其因健康原因暂停与2024年复归的经过。报告同时核对了其生日、出生地、身高、三围等身份信息，并强调对2025—2026年作品细节及体重数据需降低置信度。
+
+### Additional Metadata
+
+- **image_refs:** 
+- **doc_hash:** 2815821a4bd97e240c78ebab2983c652f71bb52968d08f0b8c2b57522ff4428d
+- **enriched_by:** llm
+- **refined_by:** llm
+- **chunk_id:** 76104c3b_0000_a9425196
+- **doc_type:** pdf
+--- DOCUMENT_SUMMARY doc_id=76104c3b JSON ---
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "result": {
+    "content": [
+      {
+        "text": "## Document: 七海蒂娜（七海ティナ）职业轨迹与公开资料深度研究报告\n\n**Document ID:** `76104c3b`\n**Source:** /home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf\n**Chunks:** 35\n**Tags:** `七海蒂娜`, `七海ティナ`, `AV女优`, `职业轨迹`, `SODstar`, `FALENOstar`, `DAHLIA`, `Attackers`, `Madonna`, `身体改造`, `复归`, `健康暂停`, `爱知县丰桥市`, `恵比寿マスカッツ`, `PDF`\n\n### Summary\n\n本报告基于日文一手资料，梳理七海蒂娜从名古屋地下偶像、写真艺人、恵比寿マスカッツ成员到SODstar、FALENOstar、DAHLIA、Attackers及Madonna专属女优的连续转型链，并记录其因健康原因暂停与2024年复归的经过。报告同时核对了其生日、出生地、身高、三围等身份信息，并强调对2025—2026年作品细节及体重数据需降低置信度。\n\n### Additional Metadata\n\n- **image_refs:** \n- **doc_hash:** 2815821a4bd97e240c78ebab2983c652f71bb52968d08f0b8c2b57522ff4428d\n- **enriched_by:** llm\n- **refined_by:** llm\n- **chunk_id:** 76104c3b_0000_a9425196\n- **doc_type:** pdf",
+        "type": "text"
+      }
+    ],
+    "isError": false
+  }
+}
+DOCUMENT_SUMMARY_SELECTED_DOC_ID='76104c3b'
+=== MCP SERVER PROCESS ===
+returncode=-15
+=== MCP SERVER STDERR ===
+Building prefix dict from the default dictionary ...
+2026-09-17 19:35:04,658 DEBUG jieba Building prefix dict from the default dictionary ...
+Loading model from cache /tmp/jieba.cache
+2026-09-17 19:35:04,659 DEBUG jieba Loading model from cache /tmp/jieba.cache
+Loading model cost 0.321 seconds.
+2026-09-17 19:35:04,979 DEBUG jieba Loading model cost 0.321 seconds.
+Prefix dict has been built successfully.
+2026-09-17 19:35:04,979 DEBUG jieba Prefix dict has been built successfully.
+=== MCP SERVER STDOUT PROTOCOL AUDIT ===
+non_json_stdout_count=0
+=== TRACE EVIDENCE WRITTEN BY MCP TOOLS ===
+trace_end_line=24
+mcp_traces_in_this_run=2
+{
+  "trace_id": "584b3be1-1010-4529-a792-7321d39a9fc2",
+  "metadata": {
+    "query": "七海蒂娜什么时候成为Madonna专属演员？在此之前经历了哪些主要职业阶段？",
+    "top_k": 5,
+    "collection": "av_actress",
+    "source": "mcp",
+    "final_results": [
+      {
+        "chunk_id": "76104c3b_0000_a9425196",
+        "score": 3.0,
+        "text": "七海蒂娜（七海ティナ）公开资料深度研究报告\n执行摘要\n检索截止：2026年9月2日。本报告以日文一手或近一手资料为优先，包括事务所官方社交媒体、制作/演出方官网、出版物元数据、票务页面与本人公开发言；其次使用日本媒体访谈、行业媒体；日文维基等聚合资料只承担“线索汇总和交叉核对”作用。对于2025—2026年部分成人作品的精确品番、实体/配信日期，由于片商商品页的公开搜索可索引性较差，本报告会明确降低置信度，而不会用中文转载站补齐看似精确、实际不可核验的信息。\n七海蒂娜的职业轨迹并非单纯的“AV女优出道—持续拍片”模式，而更接近一条连续转型链：名古屋地下偶像/地方偶像 → 写真艺人 → 恵比寿マスカッツ成员 → SODstar专属AV女优 → FALENOstar、DAHLIA → 因健康原因暂停 → 2024年以Attackers复归 → 2025年转为Madonna专属，同时持续进入舞台剧、电影等表演领域。她于2019年1月10日从SODstar正式AV出道；2020年移籍FALENOstar，2021年进入DAHLIA；2021年秋后因本人公开谈及的进食障碍复发、手术及恐慌症状暂停活动；2023年宣布复归，2024年1月由Attackers推出复归作；2025年8月起成为Madonna专属女优。事务所官方在2025年明确称其为“マドンナ専属女優”，2026年的活动信息又显示她仍在公开活动，因此截至本报告截止日，没有可靠依据认为她已经退役。1\n她最鲜明的职业标签是“身体改造叙事”与“复归叙事”。早期她将力量训练、腹肌和运动型身体直接纳入作品与公开形象，并参加过Summer Style Award等体型赛事；后期则公开表示，自己为了身心平衡不再追求过度消瘦，而从约45公斤增加约10公斤。2024年复归后的公开资料也把这种更丰满的身体变化视为新阶段形象的重要组成部分。需要强调的是，“约55公斤”只能理解为2023年前后根据本人“45公斤基础上增加约10公斤”的自述换算，不能当作2026年的现行体重。2\n在身份信息方面，目前可较有把握确认的是：生日为1993年12月8日，截至2026年9月2日为32岁；出生地公开为爱知县丰桥市；身高历年基本稳定为160厘米。2020年前后公开资料常见三围为B85/W56/H88、D罩杯，小",
+        "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf",
+        "title": "七海蒂娜（七海ティナ）职业轨迹与公开资料深度研究报告"
+      },
+      {
+        "chunk_id": "76104c3b_0016_4a74f3ec",
+        "score": 2.0,
+        "text": "年份 代表作品 | 发行日期 / 片商 | 类型或主题定位 | 为什么具有代表性 | 来源与可信度\n最大意义不在单部销量，而在于她成为 Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据\nMadonna Madonna专属第1作；目录索引通常标作JUR-435 | 2025年8月下旬；Madonna | 典型成熟/剧情向专属路线 | 专属身份：Madonna专属女优。事务所官方直接宣布“マドンナ専属女優になった七海ティナ”并称其作品为“専属第1作目”，这是比第三方销量传言更强的代表性依据 | 高；品番/精确日：中低至中。专属关系用事务所官方为准。25\n2026年的代表意义是“Madonna阶段延续”，而不是再次换厂。由于当前官方商品 | 持续活跃：",
+        "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf",
+        "title": "七海ティナ成为Madonna专属女优：代表性依据与2026年阶段延续"
+      },
+      {
+        "chunk_id": "76104c3b_0017_132678ae",
+        "score": 2.0,
+        "text": "这是比第三方销量传言准。25 更强的代表性依据 2026年的代表意义是“Madonna阶段延续”，而不是再次换厂。由于当前官方商品持续活跃：Madonna专属 2026年1月下旬；Madonna；JUR系列持续作品；以JUR-615作为可索引样本 JUR-615 成熟剧情、稳定专属期 详情页在公开搜索中索引不足，JUR-615的精确长标题和日期不宜仅凭低质转载过度断言；更可靠的是2026年仍有事务所/Madonna活动和后续宣传迹象 中高；JUR-615元数据：低至中。26 各阶段的“代表性”如何判断 SODstar时期的核心不是“某一部销量爆炸”，而是人物标签建立。她2019年首作之后，一系列片名直接围绕腹肌、肌肉体操、运动型身体等概念展开，说明制作方主动把“力量型AV女优”作为差异化卖点；这与她现实中参加健身赛事的公开活动相互强化。换言之，七海蒂娜早期的辨识度来自“人设—现实生活方式—作品企划”的高度一致，而不是单靠传统外形宣传。22",
+        "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf",
+        "title": "七海蒂娜与Madonna阶段代表性分析：JUR-615元数据及人设一致性"
+      },
+      {
+        "chunk_id": "76104c3b_0019_1e6b6b99",
+        "score": 2.0,
+        "text": "2025年Madonna专属化是目前最新的重要商业定位改变。这一结论有事务所官方账号直接背书，而不是根据第三方片单推测。由于Madonna长期以成熟角色、人妻剧情类市场定位见长，七海蒂娜从早年的运动系SODstar新人一路走到Madonna专属，也显示其公众/作品年龄定位正在从“体能型新人”转向“成熟演技型女优”。这里关于定位变化是根据她历次片商与角色类型进行的分析性判断，而非片商正式宣言。",
+        "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf",
+        "title": "七海蒂娜转投Madonna专属：从运动系新人到成熟演技型女优的定位转变"
+      },
+      {
+        "chunk_id": "76104c3b_0018_0a17aa4c",
+        "score": 2.0,
+        "text": "腹肌、肌肉体操、运动型身体等概念展开，说明制作方主动把“力量型AV女优”作为差异化卖点；这与她现实中参加健身赛事的公开活动相互强化。换言之，七海蒂娜早期的辨识度来自“人设—现实生活方式—作品企划”的高度一致，而不是单靠传统外形宣传。\n\nFALENO阶段则是一轮品牌重构。2020年她离开SODstar并以“电击移籍DEBUT”形式进入FALENOstar；相关生涯资料同时记载她开始让身体从极强肌肉感向更柔和的曲线调整。这意味着她并没有彻底舍弃健身身份，而是在尝试提高角色和作品类型的可塑性。\n\nDAHLIA阶段是成熟剧情化的过渡。2021年她进入DAHLIA后，角色越来越偏职业女性、人妻、成熟关系剧情；首部作品又恰好使用“私人健身教练”设定，使旧有运动标签与新片商的成熟定位自然衔接。\n\n2024年复归作的意义高于普通月度新作。她此前暂停并非普通换片商间隔，而与本人公开说明的健康问题相关；复归又伴随明显的身体策略改变。因此Attackers首部复归作同时承担“重启职业”和“重置外形标签”的作用，这种职业意义比难以核实的网络销量数字更适合作为代表作标准。\n\n2025年Madonna专属化是目前最新的重要商业定位改变。这一结论有事务所官方账号直接背书，而不是根据第三方片单推测。由于Madonna长期以成熟角色、人妻剧情类市场定位见长，七海蒂娜从早年的运动系SODstar新人一路走到Madonna专属，也显示其公众/作品年龄定位正在从“体能型新人”转向“成熟演技型女",
+        "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/七海蒂娜（七海ティナ）公开资料深度研究报告.pdf",
+        "title": "七海蒂娜职业阶段演变：从SODstar运动系人设到FALENO、DAHLIA与Madonna专属的品牌重构"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "stage": "initialization",
+      "elapsed_ms": 44.17,
+      "data": {
+        "collection": "av_actress",
+        "cold_start": false
+      }
+    },
+    {
+      "stage": "query_processing",
+      "elapsed_ms": 321.58,
+      "data": {
+        "method": "query_processor",
+        "original_query": "七海蒂娜什么时候成为Madonna专属演员？在此之前经历了哪些主要职业阶段？",
+        "keywords": [
+          "七海",
+          "蒂娜",
+          "时候",
+          "成为",
+          "Madonna",
+          "专属",
+          "演员",
+          "在此之前",
+          "经历",
+          "主要",
+          "职业",
+          "阶段"
+        ]
+      }
+    },
+    {
+      "stage": "sparse_retrieval",
+      "elapsed_ms": 10.85,
+      "data": {
+        "method": "bm25",
+        "keyword_count": 12,
+        "top_k": 20,
+        "result_count": 20
+      }
+    },
+    {
+      "stage": "dense_retrieval",
+      "elapsed_ms": 59.84,
+      "data": {
+        "method": "dense",
+        "provider": "unknown",
+        "top_k": 20,
+        "result_count": 20
+      }
+    },
+    {
+      "stage": "fusion",
+      "elapsed_ms": 0.07,
+      "data": {
+        "method": "rrf",
+        "input_lists": 2,
+        "top_k": 10,
+        "result_count": 10
+      }
+    },
+    {
+      "stage": "rerank",
+      "elapsed_ms": 5702.85,
+      "data": {
+        "method": "llm",
+        "provider": "llm",
+        "input_count": 10,
+        "output_count": 5
+      }
+    }
+  ]
+}
+{
+  "trace_id": "e726e55a-61a8-46a3-817f-643ce3b9d8f3",
+  "metadata": {
+    "query": "佐々木咲和以前使用过哪些艺名？什么时候开始使用现在的艺名？",
+    "top_k": 5,
+    "collection": "av_actress",
+    "source": "mcp",
+    "final_results": [
+      {
+        "chunk_id": "60dd2dfb_0002_e25c114f",
+        "score": 3.0,
+        "text": "照片方面，我没有找到明确采用CC、公共领域或其他自由许可的近期佐々木咲和照片。可核验度最高的一张近期新闻照片来自《日刊スポーツ》2024年3月16日AV新法相关活动，由村上幸将拍摄；该网站明确声明其文章、照片等版权归日刊スポーツNEWS所有，并禁止转载，故这不是自由许可图片。本报告不重新复制该新闻原图，只提供照片页作为“截图/照片参考”。文首图片为公开网页的搜索预览，仅作人物识别辅助，其原网页没有给出自由许可声明，不得视为可自由再利用图片。\n\n身份辨析、个人资料与照片\n姓名、年龄与身体资料\n日文资料直接标注其读音为ささき さわ，因此罗马字通常写作 Sasaki Sawa，不是“Sasaki Sakiwa”。职业履历把“大崎美佳”“黛ユイ”列为旧艺名，而2021年3月5日她本人公开说明因事务所转籍而改名为佐々木咲和。1\n\n属性 最新可核验结论 数据日期/时点 证据质量与说明\n现艺名 佐々木咲和 2021-03-05起 本人公开改名记录被日文资料引用；现公开账号沿用。1\n日文读音 ささき さわ 当前 日文人物资料明确标注。1\n罗马字 Sasaki Sawa 当前 由官方日文读音直接转写；“Sakiwa”不符合公开读音。1",
+        "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf",
+        "title": "佐々木咲和照片版权与身份资料核验：无自由许可近期照片，确认艺名读音与罗马字"
+      },
+      {
+        "chunk_id": "60dd2dfb_0000_27c6ab58",
+        "score": 3.0,
+        "text": "佐々木咲和（Sasaki Sawa）深度研究报告\n执行摘要\n身份结论。 用户所写的“Sasaki Sakiwa?”应校正为 Sasaki Sawa（ささき・さわ，佐々木咲和）。现有资料显示，她是同一名AV演员在不同职业阶段使用的艺名体系之一：2012年以“大崎美佳”出道，2014年末引退；2018年以“黛ユイ”重新建立公开账号，2019年恢复AV活动；2021年转籍后改用现名“佐々木咲和”；2023年又转至HANAYA PROJECT。其法定/本名没有可靠公开资料，因此应记为“未公开”，不能把“大崎美佳”“黛ユイ”等艺名当作本名。 1\n截至2026年9月2日，可相互印证程度最高的出生日期为1992年2月22日，34岁。2023年公称身体资料为身高165 cm、B88/W60/H100 cm、E罩杯、体重未公开；一个第三方影视数据库曾记为163 cm、H90 cm，而另一个中文聚合站甚至在同一页面同时出现“1991-11-30”和正文“1992-02-22”的自相矛盾记录，因此这些冲突数据不宜优先采用。她近期公开社媒简介又继续以“臀围100 cm以上”作为个人识别标签，与2023年的H100数据方向一致。 2\n职业上，她并不是典型的“单一厂牌专属明星”，而更接近她自己所说的“知名度低めの企画女優”：跨厂牌、按项目参演、过去还大量承担临时替补工作。她在2024年的公开采访中把AV新法实施后的“一月等待期”等规定与企划演员工作机会减少直接联系起来，并公开表达对这个职业的认同和继续从业的意愿。她的职业韧性主要体现在：经历引退、复出、两次改名/转籍后仍持续工作，并将“臀部/フェチ（fetish）”塑造成鲜明个人品牌，同时向线下活动、自主ROM写真和行业倡议延伸。 3\n作品层面需要特别说明一个研究限制：没有找到足以支撑“年度销量冠军”“获奖作”“评分最高作”等结论的可靠公开销售榜、官方奖项或统一影评数据库。因此，下文所谓“代表作”不伪造销量或奖项，而按可验证的职业意义选择：出道、复出、厂牌/类型扩展、跨界、改名后的持续发行、自主制作，以及截至2026年的最新发行。2012—2019年的片名资料相对完整；2020年后的很多厂牌目录在公开搜索中只稳定保留品番、发行日、",
+        "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf",
+        "title": "佐々木咲和（Sasaki Sawa）深度研究报告：艺名沿革、职业韧性与作品研究限制"
+      },
+      {
+        "chunk_id": "60dd2dfb_0003_f54a1346",
+        "score": 3.0,
+        "text": "读音\n罗马 由官方日文读音直接转写；“Sakiwa”不符合公\nSasaki Sawa 当前\n字 开读音。 1\n法定/\n没有找到本人、事务所或可信媒体披露本名的记\n真实 未公开 截至2026-09-02\n录；旧艺名不能推定为本名。 1\n姓名\n旧艺 2012以大崎美佳出道；2018以黛ユイ恢复公开\n大崎美佳、黛ユイ 2012；2018–2021\n名 活动。 1\n日文资料如此记载；低质量中文聚合页的页头出\n出生\n1992-02-22 持续公开资料 现1991-11-30、正文却又写1992-02-22，属于内\n日期\n部矛盾，因此弃用前者。 6\n当前 按1992-02-22计算；日文资料当前也显示34岁。\n34岁 2026-09-02\n年龄 1\n2023公称资料为165；存在第三方163 cm版本，",
+        "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf",
+        "title": "Sasaki Sawa Metadata: Name, Birth Date, Age, and Physical Details Verification"
+      },
+      {
+        "chunk_id": "60dd2dfb_0006_3e84d5b5",
+        "score": 2.0,
+        "text": "Reserved；非CC、非公共领域、禁止未经授权转载。 5\n\n照片参考页：\nhttps://www.nikkansports.com/entertainment/photonews/photonews_nsInc_202403160001173-2.html\n由于没有检索到明确自由许可的近期人像，法律上更稳妥的处理是引用新闻照片页而不重新托管或截取原图。\n文首网页图片预览的原站未声明CC等再利用授权，因此同样不应下载后二次发布或用于商业宣传。\n职业轨迹与年度代表作\n职业阶段\n她的职业轨迹可以分成四个阶段。第一阶段是2012年7月—2014年12月31日“大崎美佳”时期；2014年末退出，后来在采访中表示当时与业界人士结婚是引退背景。第二阶段是2018年末以“黛ユイ”恢复公开活动、2019年正式回到AV拍摄。第三阶段从2021年3月5日开始，转至Prime Agency并改名佐々木咲和。第四阶段始于2023年10月18日转籍HANAYA PROJECT；2024年起，她除拍摄外明显增加行业倡议和自主fetish内容，2025—2026仍可检索到新的事务所推广和发行目录。 9\n\n佐々木咲和职业里程碑\n2012-07 2014-12-31 2018-11 2019 2021-03 2023-10 2024-02~03 2024 2025 2026-08",
+        "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf",
+        "title": "佐々木咲和职业轨迹与照片版权说明：从大崎美佳到HANAYA PROJECT"
+      },
+      {
+        "chunk_id": "60dd2dfb_0010_87575055",
+        "score": 2.0,
+        "text": "年度 代表作品 / 发行记录 日期 厂牌 / 发行方 为什么具有代表性\n公开目录记录该年有SOD Create的3DSVR-0634；完整标题未从高质量公开来源可靠核验。VR类发行。它的代表性在于显示SODクリエイト2019复出并非一次性事件，而延续到下一年度；不对销量或口碑作无证据推断。13\n2021年3月改为“佐々木咲和”后，目录在9月至12月连续出现DNJR-00058；完整标题未可靠核验。2021-09-14 犬／妄想族。多个发行品番，因此该条可作为现艺名阶段重新建立稳定发行轨迹的代表记录。6\n2022全年可检索到多条发行，JUQ-091是其中厂牌和日期都较明确的一条。JUQ-091；完整标题未可靠核验。2022-09-13 madonna-av。选择它是为了表示她已进入持续多厂牌企划期，不是因为有公开证据证明它销售最佳。13\n2023年目录密度明显较高，涉及Madonna、Nadeshiko、Mr.michiru、AVS等多个体系；UMSO-509；完整标题未可靠核验。2023-07-25 UMANAMI / KMP目录。UMSO-509可作为这一“高频多厂牌”阶段的样本。同年10月又转籍HANAYA PROJECT，是职业组织结构上的更重要节点。14\n2024年依然有SOD发行记录；与此同时，她的公共形象明显从“仅出演”扩展到行业倡议和自主内容，因此这一年应从“作品+公共活动”双维度理解。SDDE-738；完整标题未可靠核验。2024-10-29 SOD。15\n日文履历明确记载她在2024年接受葵マリー监制的fetish向ROM写真集；正式商品名在本次高质量检索中未确认。自主制作 / 葵マリー制作协力。2024 2024。葵マリー制作支持，自主制作fetish向ROM写真。这比普通多人企划片更能说明她开始经营个人IP和直接面向核心粉丝的内容。1\n2025年仍有UMSO-603、NATR-757、UMSO-617等目录记录，说明2024的行业倡议并没有对应一个立即退出市场的趋势。该年度没有发现可靠公开销量/奖项，故2025 UMSO-603 2025-07-22 KMP",
+        "source": "/home/reaper_leviathan/projects/papermind-rag/data/my_docs/佐々木咲和（Sasaki Sawa）深度研究报告.pdf",
+        "title": "佐々木咲和发行记录与职业轨迹：2019–2025年多厂牌作品及公共活动演变"
+      }
+    ]
+  },
+  "stages": [
+    {
+      "stage": "initialization",
+      "elapsed_ms": 7.02,
+      "data": {
+        "collection": "av_actress",
+        "cold_start": false
+      }
+    },
+    {
+      "stage": "query_processing",
+      "elapsed_ms": 0.14,
+      "data": {
+        "method": "query_processor",
+        "original_query": "佐々木咲和以前使用过哪些艺名？什么时候开始使用现在的艺名？",
+        "keywords": [
+          "佐",
+          "々",
+          "木咲",
+          "以前",
+          "艺名",
+          "时候",
+          "开始",
+          "现在"
+        ]
+      }
+    },
+    {
+      "stage": "sparse_retrieval",
+      "elapsed_ms": 8.58,
+      "data": {
+        "method": "bm25",
+        "keyword_count": 8,
+        "top_k": 20,
+        "result_count": 18
+      }
+    },
+    {
+      "stage": "dense_retrieval",
+      "elapsed_ms": 27.42,
+      "data": {
+        "method": "dense",
+        "provider": "unknown",
+        "top_k": 20,
+        "result_count": 20
+      }
+    },
+    {
+      "stage": "fusion",
+      "elapsed_ms": 0.05,
+      "data": {
+        "method": "rrf",
+        "input_lists": 2,
+        "top_k": 10,
+        "result_count": 10
+      }
+    },
+    {
+      "stage": "rerank",
+      "elapsed_ms": 5020.95,
+      "data": {
+        "method": "llm",
+        "provider": "llm",
+        "input_count": 10,
+        "output_count": 5
+      }
+    }
+  ]
+}
+=== END MCP AV_ACTRESS FINAL BLACK-BOX ACCEPTANCE ===

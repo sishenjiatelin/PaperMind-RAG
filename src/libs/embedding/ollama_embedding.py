@@ -129,7 +129,9 @@ class OllamaEmbedding(BaseEmbedding):
             }
             
             try:
-                with httpx.Client(timeout=self.timeout) as client:
+                # Ollama is normally local; bypass inherited HTTP proxy settings
+                # so localhost requests do not get sent to an external proxy.
+                with httpx.Client(timeout=self.timeout, trust_env=False) as client:
                     response = client.post(url, json=payload)
                     response.raise_for_status()
                     

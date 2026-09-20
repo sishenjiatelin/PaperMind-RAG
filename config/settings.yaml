@@ -6,12 +6,14 @@
 # LLM Configuration
 # =============================================================================
 llm:
-  provider: "openai"  # Options: openai, azure, ollama, deepseek
-  model: "gpt-4o"
-  deployment_name: "gpt-4o"
-  azure_endpoint: "https://YOUR_ENDPOINT.openai.azure.com/"
-  api_version: "2024-02-15-preview"
-  api_key: "YOUR_API_KEY_HERE"
+  provider: "deepseek"
+  model: "deepseek-chat"
+  deployment_name: ""
+  azure_endpoint: ""
+  api_version: ""
+  # Read from DEEPSEEK_API_KEY in the environment/.env; do not commit secrets here.
+  api_key: ""
+  base_url: "https://api.deepseek.com"
   temperature: 0.0
   max_tokens: 4096
 
@@ -19,29 +21,28 @@ llm:
 # Embedding Configuration
 # =============================================================================
 embedding:
-  provider: "openai"  # Options: openai, azure, ollama
-  model: "text-embedding-ada-002"
-  dimensions: 1536  # text-embedding-ada-002 固定维度 (不传递给API, 仅用于验证)
+  provider: "ollama"
+  model: "nomic-embed-text"
+  dimensions: 768
   # Azure-compatible settings (azure_endpoint triggers Azure compat mode):
-  azure_endpoint: "https://YOUR_ENDPOINT.openai.azure.com/"
-  deployment_name: "text-embedding-ada-002"
-  api_version: "2024-02-15-preview"
-  api_key: "YOUR_API_KEY_HERE"
-  # OpenAI-specific settings (if provider is openai):
-  # api_key: "YOUR_API_KEY_HERE"
+  azure_endpoint: ""
+  deployment_name: ""
+  api_version: ""
+  api_key: ""
+  base_url: "http://localhost:11434"
 
 # =============================================================================
 # Vision LLM Configuration (for Image Captioning)
 # =============================================================================
 vision_llm:
-  enabled: true  # Set to true to enable vision capabilities
+  enabled: false
   provider: "openai"  # Options: openai, azure, ollama
   model: "gpt-4o"  # Options: gpt-4o, gpt-4-vision-preview (OpenAI), llava (Ollama)
   # Azure-compatible settings (azure_endpoint triggers Azure compat mode):
-  azure_endpoint: "https://YOUR_ENDPOINT.openai.azure.com/"
-  deployment_name: "gpt-4o"
-  api_version: "2024-02-15-preview"
-  api_key: "YOUR_API_KEY_HERE"
+  azure_endpoint: ""
+  deployment_name: ""
+  api_version: ""
+  api_key: ""
   # Ollama-specific settings (if provider is ollama):
   # base_url: "http://localhost:11434"
   max_image_size: 2048  # Max dimension (width/height) for image compression
@@ -67,21 +68,21 @@ retrieval:
 # Rerank Configuration
 # =============================================================================
 rerank:
-  enabled: false
-  provider: "none"  # Options: none, cross_encoder, llm
-  model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  enabled: true
+  provider: "llm"  # Options: none, cross_encoder, llm
+  model: "none"
   top_k: 5
 
 # =============================================================================
 # Evaluation Configuration
 # =============================================================================
 evaluation:
-  enabled: false
-  provider: "custom"  # Options: ragas, deepeval, custom
+  enabled: true
+  provider: "ragas"  # Options: ragas, deepeval, custom
   metrics:
-    - "hit_rate"
-    - "mrr"
     - "faithfulness"
+    - "answer_relevancy"
+    - "context_precision"
 
 # =============================================================================
 # Observability Configuration

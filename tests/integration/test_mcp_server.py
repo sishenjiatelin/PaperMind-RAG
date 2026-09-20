@@ -5,10 +5,28 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import threading
 import time
 from typing import Any, Dict, List, Optional
 
 import pytest
+
+
+def _capture_stderr(proc: subprocess.Popen) -> None:
+    """Drain stderr separately so startup failures are visible in assertions."""
+    stderr_lines: List[str] = []
+    setattr(proc, "_mcp_stderr_lines", stderr_lines)
+
+    def _reader() -> None:
+        assert proc.stderr is not None
+        for line in proc.stderr:
+            stderr_lines.append(line.rstrip("\r\n"))
+
+    threading.Thread(target=_reader, daemon=True).start()
+
+
+def _diagnostic_summary(proc: subprocess.Popen) -> str:
+    return f"returncode={proc.poll()}, stderr={getattr(proc, '_mcp_stderr_lines', [])!r}"
 
 
 def send_and_receive(
@@ -30,6 +48,7 @@ def send_and_receive(
     """
     assert proc.stdin is not None
     assert proc.stdout is not None
+    _capture_stderr(proc)
 
     # Send all requests
     for req in requests:
@@ -116,10 +135,13 @@ def test_mcp_server_initialize_stdio() -> None:
             proc.kill()
             proc.wait()
 
-    assert len(lines) > 0, "No stdout lines received."
+    assert len(lines) > 0, f"No stdout lines received. {_diagnostic_summary(proc)}"
 
     response = find_response(lines, 1)
-    assert response is not None, f"No initialize response found in: {lines}"
+    assert response is not None, (
+        f"No initialize response found in: {lines}. "
+        f"{_diagnostic_summary(proc)}"
+    )
 
     assert response["jsonrpc"] == "2.0"
     assert response["id"] == 1
@@ -176,16 +198,22 @@ def test_mcp_server_tools_list_stdio() -> None:
             proc.kill()
             proc.wait()
 
-    assert len(lines) > 0, "No stdout lines received."
+    assert len(lines) > 0, f"No stdout lines received. {_diagnostic_summary(proc)}"
 
     # Verify initialize response
     init_response = find_response(lines, 1)
-    assert init_response is not None, f"No initialize response found in: {lines}"
+    assert init_response is not None, (
+        f"No initialize response found in: {lines}. "
+        f"{_diagnostic_summary(proc)}"
+    )
     assert "result" in init_response
 
     # Verify tools/list response
     tools_response = find_response(lines, 2)
-    assert tools_response is not None, f"No tools/list response found in: {lines}"
+    assert tools_response is not None, (
+        f"No tools/list response found in: {lines}. "
+        f"{_diagnostic_summary(proc)}"
+    )
 
     assert tools_response["jsonrpc"] == "2.0"
     assert tools_response["id"] == 2

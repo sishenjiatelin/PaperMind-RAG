@@ -574,11 +574,10 @@ class GetDocumentSummaryTool:
         logger.info(f"Executing get_document_summary (doc_id={doc_id}, collection={collection})")
         
         try:
-            # Run blocking ChromaDB I/O in a thread to avoid blocking
-            # the async event loop / MCP stdio transport
-            summary = await asyncio.to_thread(
-                self.get_document_summary, doc_id, collection,
-            )
+            # Chroma's SQLite-backed client does not reliably hand control
+            # back from asyncio.to_thread in this stdio subprocess.  This is
+            # a short local lookup, so execute it directly here.
+            summary = self.get_document_summary(doc_id, collection)
             response_text = self.format_response(summary)
             
             return types.CallToolResult(

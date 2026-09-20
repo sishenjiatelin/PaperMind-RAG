@@ -1,10 +1,8 @@
-"""Evaluation Panel page – run evaluations and view metrics.
+"""Ground-Truth-aware Evaluation Panel.
 
-Layout:
-1. Configuration section: select evaluator backend, golden test set, top_k
-2. Run button with progress indicator
-3. Results section: aggregate metrics, per-query detail table
-4. Optional: historical evaluation results comparison
+The page is intentionally a thin UI over :class:`EvalRunner`. Retrieval,
+reranking, answer generation, and evaluator construction come from the
+shared Evaluation Core used by the CLI.
 """
 
 from __future__ import annotations
@@ -19,311 +17,263 @@ import streamlit as st
 
 logger = logging.getLogger(__name__)
 
-# Default golden test set location
-DEFAULT_GOLDEN_SET = Path("tests/fixtures/golden_test_set.json")
-# Evaluation results history file
+DEFAULT_BACKEND = "ragas"
+DEFAULT_COLLECTION = "av_actress"
+DEFAULT_TOP_K = 5
+DEFAULT_GOLDEN_SET = Path("tests/fixtures/golden_av_actress.json")
 EVAL_HISTORY_PATH = Path("logs/eval_history.jsonl")
+
+RETRIEVAL_METRIC_LABELS = {
+    "hit_at_k": "Hit@K",
+    "mrr": "MRR",
+    "precision_at_k": "Precision@K",
+    "recall_at_k": "Recall@K",
+    "ndcg_at_k": "nDCG@K",
+}
+GENERATION_METRIC_LABELS = {
+    "faithfulness": "Faithfulness",
+    "answer_relevancy": "Answer Relevancy",
+    "context_precision": "Context Precision",
+    "answer_correctness": "Answer Correctness",
+}
 
 
 def render() -> None:
-    """Render the Evaluation Panel page."""
+    """Render configuration, coverage, results, and evaluation history."""
     st.header("📏 Evaluation Panel")
     st.markdown(
-        "Run evaluation against a **golden test set** to measure retrieval "
-        "and generation quality. Results include per-query details and "
-        "aggregate metrics."
+        "Run the shared CLI/Dashboard Evaluation Core against a **golden test set**. "
+        "Retrieval and generation metrics are shown according to the Ground Truth "
+        "fields available in that test set."
     )
 
-    # ── Configuration Section ──────────────────────────────────────
     st.subheader("⚙️ Configuration")
-
     col1, col2, col3 = st.columns(3)
-
     with col1:
         backend = st.selectbox(
-            "Evaluator Backend",
-            options=["custom", "ragas", "composite"],
-            index=0,
-            key="eval_backend",
-            help="Select which evaluator backend to use.",
+            "Evaluator Backend", options=["ragas", "custom", "composite"], index=0,
+            key="eval_backend", help="Ragas is the default production evaluator.",
         )
-
-    # Show info/warning based on selected backend
-    if backend in ("custom", "composite"):
-        st.info(
-            "ℹ️ **Custom Evaluator** 尚未完成数据集准备，当前仅为预留接口。"
-            "Custom Evaluator 需要在 Golden Test Set 中填写 `expected_chunk_ids` "
-            "作为 ground truth 才能计算 hit_rate / MRR 指标。"
-            "目前建议使用 **ragas** 后端进行评估。",
-            icon="🚧",
-        )
-
     with col2:
         top_k = st.number_input(
-            "Top-K",
-            min_value=1,
-            max_value=50,
-            value=10,
-            key="eval_top_k",
-            help="Number of chunks to retrieve per query.",
+            "Top-K", min_value=1, max_value=50, value=DEFAULT_TOP_K,
+            key="eval_top_k", help="Final context size after reranking.",
         )
-
     with col3:
         collection = st.text_input(
-            "Collection (optional)",
-            value="",
-            key="eval_collection",
-            help="Limit retrieval to a specific collection.",
+            "Collection", value=DEFAULT_COLLECTION, key="eval_collection",
+            help="Collection bound to the shared HybridSearch pipeline.",
         )
 
-    # Golden test set file selection
     golden_path_str = st.text_input(
-        "Golden Test Set Path",
-        value=str(DEFAULT_GOLDEN_SET),
-        key="eval_golden_path",
-        help="Path to the golden_test_set.json file.",
+        "Golden Test Set Path", value=str(DEFAULT_GOLDEN_SET),
+        key="eval_golden_path", help="JSON file containing queries and Ground Truth.",
     )
     golden_path = Path(golden_path_str)
+    _sync_golden_set_state(golden_path)
 
-    # Validate golden set exists
-    if not golden_path.exists():
-        st.warning(
-            f"⚠️ **Golden test set not found:** `{golden_path}`. "
-            "Create a JSON file with test queries and expected results. "
-            "See `tests/fixtures/golden_test_set.json` for the format."
+    if backend in ("custom", "composite"):
+        st.info(
+            "Retrieval metrics are computed by the shared Evaluation Core when "
+            "Ground Truth is present. Ragas remains the recommended production backend.",
+            icon="ℹ️",
         )
 
-    # ── Answer Input Section (for Ragas) ───────────────────────────
-    user_answers: Dict[int, str] = {}
-    if backend == "ragas" and golden_path.exists():
-        st.divider()
-        st.subheader("✏️ Provide Answers (回答输入)")
-        st.caption(
-            "**RAGAS 需要 Query + Context + Answer 三要素来评估。**"
-            "日志中仅包含 Query 和检索到的上下文（Context），"
-            "请为每个测试用例填写实际的系统回答（Answer），"
-            "以便获得有意义的 faithfulness 和 answer_relevancy 评分。"
-        )
+    test_cases: List[Dict[str, Any]] = []
+    if golden_path.exists():
         try:
-            _test_cases = _load_golden_queries(golden_path)
-            for tc_idx, tc in enumerate(_test_cases):
-                ans_key = f"eval_answer_tc_{tc_idx}"
-                default_val = tc.get("reference_answer", "")
-                q_preview = tc["query"][:60] + ("…" if len(tc["query"]) > 60 else "")
-                user_ans = st.text_area(
-                    f"Q{tc_idx + 1}: {q_preview}",
-                    value=st.session_state.get(ans_key, default_val),
-                    height=80,
-                    key=ans_key,
-                    placeholder="请输入该问题对应的系统回答…",
-                    help=(
-                        f"Query: {tc['query']}\n\n"
-                        "填写 LLM 生成的回答或期望的回答文本。"
-                        "Ragas 会基于此评估 faithfulness（忠实度）和 answer_relevancy（相关性）。"
-                    ),
-                )
-                if user_ans.strip():
-                    user_answers[tc_idx] = user_ans.strip()
-
-            # Show fill status
-            filled = len(user_answers)
-            total = len(_test_cases)
-            if filled < total:
-                st.warning(f"⚠️ 已填写 {filled}/{total} 个回答。未填写的用例将使用检索片段拼接作为回答（评估结果可能不准确）。")
-            else:
-                st.success(f"✅ 所有 {total} 个回答已填写。")
+            test_cases = _load_golden_queries(golden_path)
+            _render_ground_truth_coverage(test_cases)
         except Exception as exc:
-            st.warning(f"无法加载测试用例预览: {exc}")
+            st.warning(f"无法加载 Golden Test Set: {exc}")
+    else:
+        st.warning(f"⚠️ **Golden test set not found:** `{golden_path}`.")
 
-    # ── Run Evaluation ─────────────────────────────────────────────
+    user_answers = _render_optional_answer_overrides(test_cases, golden_path, backend)
+
     st.divider()
-
     run_clicked = st.button(
-        "▶️  Run Evaluation",
-        type="primary",
-        key="eval_run_btn",
+        "▶️  Run Evaluation", type="primary", key="eval_run_btn",
         disabled=not golden_path.exists(),
     )
-
     if run_clicked:
         _run_evaluation(
-            backend=backend,
-            golden_path=golden_path,
-            top_k=int(top_k),
-            collection=collection.strip() or None,
-            user_answers=user_answers if user_answers else None,
+            backend=backend, golden_path=golden_path, top_k=int(top_k),
+            collection=collection.strip() or DEFAULT_COLLECTION,
+            user_answers=user_answers or None,
         )
 
-    # ── Historical Results ─────────────────────────────────────────
     st.divider()
     _render_history()
 
 
+def _sync_golden_set_state(golden_path: Path) -> None:
+    """Clear testcase-scoped state whenever the selected file changes."""
+    state_key = str(golden_path.resolve())
+    previous = st.session_state.get("_eval_golden_set_state")
+    if previous == state_key:
+        return
+
+    for key in list(st.session_state.keys()):
+        if str(key).startswith("eval_answer_override_"):
+            del st.session_state[key]
+    st.session_state["_eval_golden_set_state"] = state_key
+    st.session_state["eval_manual_answers_enabled"] = False
+
+
+def _render_optional_answer_overrides(
+    test_cases: List[Dict[str, Any]], golden_path: Path, backend: str,
+) -> Dict[int, str]:
+    """Render manual overrides only as an explicit Advanced option."""
+    if backend != "ragas" or not test_cases:
+        return {}
+
+    with st.expander("Advanced: Manual Answer Overrides (optional)", expanded=False):
+        st.caption(
+            "默认关闭。正常 Ragas Evaluation 会调用当前 DeepSeek Answer Generator。"
+            "Reference Answer 只用于展示/未来评估输入，不会被当作 generated_answer。"
+        )
+        enabled = st.checkbox(
+            "Enable manual answer overrides", value=False,
+            key="eval_manual_answers_enabled",
+        )
+        if not enabled:
+            return {}
+
+        signature = str(golden_path.resolve()).replace("/", "_").replace("\\", "_")
+        answers: Dict[int, str] = {}
+        for index, test_case in enumerate(test_cases):
+            answer = st.text_area(
+                f"Q{index + 1}: {test_case.get('query', '')[:80]}",
+                value="", key=f"eval_answer_override_{signature}_{index}",
+                height=80, placeholder="仅在明确需要时输入人工 Answer Override…",
+            )
+            if answer.strip():
+                answers[index] = answer.strip()
+        return answers
+
+
+def _ground_truth_coverage(test_cases: List[Dict[str, Any]]) -> Dict[str, int]:
+    """Count coverage of every currently supported Ground Truth field."""
+    total = len(test_cases)
+    return {
+        "queries": total,
+        "reference_answers": sum(bool(item.get("reference_answer")) for item in test_cases),
+        "expected_sources": sum(bool(item.get("expected_sources")) for item in test_cases),
+        "expected_chunk_ids": sum(bool(item.get("expected_chunk_ids")) for item in test_cases),
+        "relevance_judgments": sum(bool(item.get("relevance_judgments")) for item in test_cases),
+    }
+
+
+def _render_ground_truth_coverage(test_cases: List[Dict[str, Any]]) -> None:
+    coverage = _ground_truth_coverage(test_cases)
+    st.subheader("🎯 Ground Truth Coverage")
+    cols = st.columns(5)
+    labels = (
+        ("Queries", "queries"), ("Reference Answers", "reference_answers"),
+        ("Expected Sources", "expected_sources"),
+        ("Expected Chunk IDs", "expected_chunk_ids"),
+        ("Graded Relevance", "relevance_judgments"),
+    )
+    for col, (label, key) in zip(cols, labels):
+        with col:
+            value = coverage[key]
+            display = str(value) if key == "queries" else f"{value}/{coverage['queries']}"
+            st.metric(label, display)
+
+
 def _run_evaluation(
-    backend: str,
-    golden_path: Path,
-    top_k: int,
-    collection: Optional[str],
+    backend: str, golden_path: Path, top_k: int, collection: Optional[str],
     user_answers: Optional[Dict[int, str]] = None,
 ) -> None:
-    """Execute an evaluation run and display results.
-
-    Attempts to load the evaluator, run the golden test set, and
-    display aggregate + per-query metrics.  Falls back to a graceful
-    error message on failure.
-    """
-    with st.spinner("Loading evaluator and running evaluation…"):
+    with st.spinner("Loading shared Evaluation Core and running evaluation…"):
         try:
             report_dict = _execute_evaluation(
-                backend=backend,
-                golden_path=golden_path,
-                top_k=top_k,
-                collection=collection,
-                user_answers=user_answers,
+                backend=backend, golden_path=golden_path, top_k=top_k,
+                collection=collection, user_answers=user_answers,
             )
         except Exception as exc:
             st.error(f"❌ Evaluation failed: {exc}")
             logger.exception("Evaluation failed")
             return
 
-    # ── Display results ────────────────────────────────────────────
     st.success("✅ Evaluation complete!")
-
     _render_aggregate_metrics(report_dict)
     _render_query_details(report_dict)
-
-    # Save to history
     _save_to_history(report_dict)
 
 
 def _execute_evaluation(
-    backend: str,
-    golden_path: Path,
-    top_k: int,
-    collection: Optional[str],
+    backend: str, golden_path: Path, top_k: int, collection: Optional[str],
     user_answers: Optional[Dict[int, str]] = None,
 ) -> Dict[str, Any]:
-    """Run the evaluation pipeline and return the report dict.
-
-    This function imports heavy dependencies lazily to keep the
-    dashboard responsive when the page is not used.
-    """
+    """Run the same shared pipeline used by ``scripts/evaluate.py``."""
     from dataclasses import replace as dc_replace
 
+    from dotenv import load_dotenv
     from src.core.settings import load_settings
     from src.libs.evaluator.evaluator_factory import EvaluatorFactory
-    from src.observability.evaluation.eval_runner import EvalRunner, load_test_set
+    from src.observability.evaluation.eval_runner import EvalRunner
+    from src.observability.evaluation.pipeline import build_evaluation_pipeline
 
+    # The CLI loads the project .env before constructing providers.  Dashboard
+    # runs inside Streamlit, so load the same project environment at the shared
+    # execution boundary before DeepSeek/Ollama/Rerank are initialized.
+    load_dotenv(Path(__file__).resolve().parents[4] / ".env")
     settings = load_settings()
-
-    # Override evaluator provider from UI selection — build a new full
-    # Settings object so that RagasEvaluator can still access .llm / .embedding.
     eval_settings = settings.evaluation
     overridden_eval = type(eval_settings)(
-        enabled=True,
-        provider=backend,
+        enabled=True, provider=backend,
         metrics=eval_settings.metrics if hasattr(eval_settings, "metrics") else [],
     )
-    # Replace only the evaluation sub-config in the full settings
     settings_with_override = dc_replace(settings, evaluation=overridden_eval)
-
     evaluator = EvaluatorFactory.create(settings_with_override)
 
-    # Try to create HybridSearch (optional – works without if not configured)
-    target_collection = collection or "default"
-    hybrid_search = _try_create_hybrid_search(settings, target_collection)
-
-    # Create reranker if enabled
-    reranker = None
-    try:
-        from src.core.query_engine.reranker import create_core_reranker
-        reranker = create_core_reranker(settings=settings)
-        if not reranker.is_enabled:
-            reranker = None
-    except Exception as exc:
-        logger.warning("Could not create reranker: %s", exc)
-
-    # Build answer_override map: index → user-provided answer text
-    # EvalRunner will use these instead of auto-generating from chunks.
+    target_collection = collection or DEFAULT_COLLECTION
+    pipeline = build_evaluation_pipeline(settings, target_collection)
     runner = EvalRunner(
-        settings=settings,
-        hybrid_search=hybrid_search,
+        settings=settings_with_override,
+        hybrid_search=pipeline.hybrid_search,
+        reranker=pipeline.reranker,
         evaluator=evaluator,
+        answer_generator=pipeline.answer_generator,
         answer_overrides=user_answers,
-        reranker=reranker,
     )
-
     report = runner.run(
-        test_set_path=golden_path,
-        top_k=top_k,
-        collection=collection,
+        test_set_path=golden_path, top_k=top_k, collection=target_collection,
     )
-
     return report.to_dict()
 
 
-def _try_create_hybrid_search(settings: Any, collection: str = "default") -> Any:
-    """Attempt to create a HybridSearch instance.
+def _render_metric_group(
+    title: str, labels: Dict[str, str], aggregate: Dict[str, float],
+    statuses: Dict[str, str],
+) -> None:
+    st.markdown(f"### {title}")
+    cols = st.columns(min(max(len(labels), 1), 4))
+    for index, (metric, label) in enumerate(labels.items()):
+        with cols[index % len(cols)]:
+            if metric in aggregate:
+                st.metric(label, f"{aggregate[metric]:.4f}")
+            else:
+                reason = statuses.get(metric, "missing Ground Truth")
+                st.info(f"{label}\n\nMetric unavailable: {reason}")
 
-    Returns None if required dependencies are not available
-    (e.g., no indexed data).
-    """
-    try:
-        from src.core.query_engine.query_processor import QueryProcessor
-        from src.core.query_engine.hybrid_search import create_hybrid_search
-        from src.core.query_engine.dense_retriever import create_dense_retriever
-        from src.core.query_engine.sparse_retriever import create_sparse_retriever
-        from src.ingestion.storage.bm25_indexer import BM25Indexer
-        from src.libs.embedding.embedding_factory import EmbeddingFactory
-        from src.libs.vector_store.vector_store_factory import VectorStoreFactory
 
-        vector_store = VectorStoreFactory.create(
-            settings, collection_name=collection,
-        )
-        embedding_client = EmbeddingFactory.create(settings)
-        dense_retriever = create_dense_retriever(
-            settings=settings,
-            embedding_client=embedding_client,
-            vector_store=vector_store,
-        )
-        bm25_indexer = BM25Indexer(index_dir=f"data/db/bm25/{collection}")
-        sparse_retriever = create_sparse_retriever(
-            settings=settings,
-            bm25_indexer=bm25_indexer,
-            vector_store=vector_store,
-        )
-        sparse_retriever.default_collection = collection
-
-        query_processor = QueryProcessor()
-        return create_hybrid_search(
-            settings=settings,
-            query_processor=query_processor,
-            dense_retriever=dense_retriever,
-            sparse_retriever=sparse_retriever,
-        )
-    except Exception as exc:
-        logger.warning("Could not create HybridSearch: %s", exc)
-        return None
+def _aggregate_unavailable_statuses(report: Dict[str, Any]) -> Dict[str, str]:
+    statuses: Dict[str, str] = {}
+    for query_result in report.get("query_results", []):
+        for metric, reason in query_result.get("metric_status", {}).items():
+            statuses.setdefault(metric, reason)
+    return statuses
 
 
 def _render_aggregate_metrics(report: Dict[str, Any]) -> None:
-    """Display aggregate metrics as metric cards."""
     st.subheader("📊 Aggregate Metrics")
-
-    agg = report.get("aggregate_metrics", {})
-
-    if not agg:
-        st.info("No aggregate metrics available.")
-        return
-
-    cols = st.columns(min(len(agg), 4))
-    for idx, (name, value) in enumerate(sorted(agg.items())):
-        with cols[idx % len(cols)]:
-            st.metric(
-                label=name.replace("_", " ").title(),
-                value=f"{value:.4f}",
-            )
-
+    aggregate = report.get("aggregate_metrics", {})
+    statuses = _aggregate_unavailable_statuses(report)
+    _render_metric_group("Retrieval Metrics", RETRIEVAL_METRIC_LABELS, aggregate, statuses)
+    _render_metric_group("Generation Metrics", GENERATION_METRIC_LABELS, aggregate, statuses)
     st.caption(
         f"Evaluator: **{report.get('evaluator_name', '—')}** · "
         f"Queries: **{report.get('query_count', 0)}** · "
@@ -332,123 +282,120 @@ def _render_aggregate_metrics(report: Dict[str, Any]) -> None:
 
 
 def _render_query_details(report: Dict[str, Any]) -> None:
-    """Display per-query evaluation results in an expandable table."""
     st.subheader("🔍 Per-Query Details")
-
     query_results = report.get("query_results", [])
     if not query_results:
         st.info("No per-query results available.")
         return
 
-    for idx, qr in enumerate(query_results):
-        query = qr.get("query", "—")
-        elapsed = qr.get("elapsed_ms", 0)
-        metrics = qr.get("metrics", {})
+    for index, query_result in enumerate(query_results):
+        query = query_result.get("query", "—")
+        with st.expander(f"**Q{index + 1}**: {query[:100]}", expanded=False):
+            st.markdown("**Query**")
+            st.write(query)
+            st.markdown("**Retrieved results**")
+            retrieved = query_result.get("retrieved_results", [])
+            if retrieved:
+                st.dataframe(
+                    [
+                        {
+                            "rank": item.get("rank", rank),
+                            "chunk id": item.get("chunk_id", ""),
+                            "source": item.get("source", ""),
+                            "retrieval score": item.get("retrieval_score", item.get("score", 0.0)),
+                            "fusion score": item.get("fusion_score", item.get("score", 0.0)),
+                            "rerank score": item.get("rerank_score", item.get("score", 0.0)),
+                        }
+                        for rank, item in enumerate(retrieved, start=1)
+                    ],
+                    use_container_width=True,
+                )
+            else:
+                st.info("No retrieved results.")
 
-        # Build metric summary for the expander label
-        metric_summary = " · ".join(
-            f"{k}: {v:.3f}" for k, v in sorted(metrics.items())
-        )
-        if not metric_summary:
-            metric_summary = "no metrics"
+            st.markdown("**Generated Answer**")
+            st.write(query_result.get("generated_answer") or "No generated answer.")
+            if query_result.get("reference_answer"):
+                st.markdown("**Reference Answer**")
+                st.write(query_result["reference_answer"])
 
-        with st.expander(
-            f"**Q{idx + 1}**: {query[:80]} — {elapsed:.0f} ms — {metric_summary}",
-            expanded=False,
-        ):
-            # Metrics
+            ground_truth = {
+                key: query_result.get(key)
+                for key in ("expected_sources", "expected_chunk_ids", "relevance_judgments")
+                if query_result.get(key)
+            }
+            if ground_truth:
+                st.markdown("**Retrieval Ground Truth**")
+                st.json(ground_truth)
+
+            st.markdown("**Per-query metrics**")
+            metrics = query_result.get("metrics", {})
             if metrics:
-                mcols = st.columns(min(len(metrics), 4))
-                for midx, (mname, mval) in enumerate(sorted(metrics.items())):
-                    with mcols[midx % len(mcols)]:
-                        st.metric(mname, f"{mval:.4f}")
-
-            # Retrieved chunks
-            chunks = qr.get("retrieved_chunk_ids", [])
-            if chunks:
-                st.markdown(f"**Retrieved Chunks** ({len(chunks)}):")
-                st.code(", ".join(chunks[:20]), language=None)
-
-            # Generated answer
-            answer = qr.get("generated_answer")
-            if answer:
-                st.markdown("**Generated Answer:**")
-                st.text(answer[:500])
+                metric_cols = st.columns(min(len(metrics), 4))
+                for metric_index, (metric, value) in enumerate(sorted(metrics.items())):
+                    label = RETRIEVAL_METRIC_LABELS.get(
+                        metric, GENERATION_METRIC_LABELS.get(metric, metric)
+                    )
+                    with metric_cols[metric_index % len(metric_cols)]:
+                        st.metric(label, f"{value:.4f}")
+            for metric, reason in query_result.get("metric_status", {}).items():
+                label = RETRIEVAL_METRIC_LABELS.get(metric, metric)
+                st.info(f"{label}: Metric unavailable: {reason}")
 
 
 def _render_history() -> None:
-    """Display historical evaluation results for comparison."""
     st.subheader("📈 Evaluation History")
-
     history = _load_history()
     if not history:
-        st.info(
-            "**No evaluation history yet.** "
-            "Configure the evaluator above and click \"Run Evaluation\" to start. "
-            "Results will be saved here for comparison across runs."
-        )
+        st.info("**No evaluation history yet.** Configure the evaluator and click Run Evaluation to start.")
         return
-
-    # Show recent runs as a table
     rows = []
-    for entry in history[-10:]:  # last 10 runs
+    for entry in history[-10:]:
         rows.append(
             {
                 "Timestamp": entry.get("timestamp", "—"),
                 "Evaluator": entry.get("evaluator_name", "—"),
                 "Queries": entry.get("query_count", 0),
                 "Time (ms)": round(entry.get("total_elapsed_ms", 0)),
-                **{
-                    k: round(v, 4)
-                    for k, v in entry.get("aggregate_metrics", {}).items()
-                },
+                **{key: round(value, 4) for key, value in entry.get("aggregate_metrics", {}).items()},
             }
         )
-
     st.dataframe(rows, use_container_width=True)
 
 
 def _save_to_history(report: Dict[str, Any]) -> None:
-    """Append an evaluation report to the history file."""
     try:
         EVAL_HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
-        entry = {
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            **report,
-        }
-        with EVAL_HISTORY_PATH.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        with EVAL_HISTORY_PATH.open("a", encoding="utf-8") as handle:
+            handle.write(
+                json.dumps(
+                    {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), **report},
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
     except Exception as exc:
         logger.warning("Failed to save evaluation history: %s", exc)
 
 
 def _load_history() -> List[Dict[str, Any]]:
-    """Load evaluation history from JSONL file."""
     if not EVAL_HISTORY_PATH.exists():
         return []
-
     entries: List[Dict[str, Any]] = []
     try:
-        with EVAL_HISTORY_PATH.open("r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    try:
+        with EVAL_HISTORY_PATH.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                try:
+                    if line.strip():
                         entries.append(json.loads(line))
-                    except json.JSONDecodeError:
-                        continue
+                except json.JSONDecodeError:
+                    continue
     except Exception as exc:
         logger.warning("Failed to load evaluation history: %s", exc)
-
     return entries
 
 
 def _load_golden_queries(golden_path: Path) -> List[Dict[str, Any]]:
-    """Load test cases from golden test set for display in the UI.
-
-    Returns list of dicts with at least 'query' and optionally
-    'reference_answer' keys.
-    """
-    with golden_path.open("r", encoding="utf-8") as f:
-        data = json.load(f)
+    with golden_path.open("r", encoding="utf-8") as handle:
+        data = json.load(handle)
     return data.get("test_cases", [])

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock, patch
 
@@ -97,7 +98,103 @@ class TestEvaluationPanelImport:
 
     def test_default_golden_path(self) -> None:
         from src.observability.dashboard.pages.evaluation_panel import (
+            DEFAULT_BACKEND,
+            DEFAULT_COLLECTION,
             DEFAULT_GOLDEN_SET,
+            DEFAULT_TOP_K,
         )
 
-        assert DEFAULT_GOLDEN_SET == Path("tests/fixtures/golden_test_set.json")
+        assert DEFAULT_BACKEND == "ragas"
+        assert DEFAULT_COLLECTION == "av_actress"
+        assert DEFAULT_TOP_K == 5
+        assert DEFAULT_GOLDEN_SET == Path("tests/fixtures/golden_av_actress.json")
+
+    def test_ground_truth_coverage(self) -> None:
+        from src.observability.dashboard.pages.evaluation_panel import _ground_truth_coverage
+
+        coverage = _ground_truth_coverage([
+            {
+                "query": "q1",
+                "reference_answer": "a1",
+                "expected_sources": ["doc.pdf"],
+                "expected_chunk_ids": [],
+            },
+            {
+                "query": "q2",
+                "reference_answer": "a2",
+                "expected_sources": [],
+                "expected_chunk_ids": ["chunk-2"],
+                "relevance_judgments": {"chunk-2": 3},
+            },
+        ])
+
+        assert coverage == {
+            "queries": 2,
+            "reference_answers": 2,
+            "expected_sources": 1,
+            "expected_chunk_ids": 1,
+            "relevance_judgments": 1,
+        }
+
+    def test_golden_set_switch_clears_answer_state(self) -> None:
+        from src.observability.dashboard.pages import evaluation_panel as ep
+
+        old_session_state = ep.st.session_state
+        ep.st.session_state = {
+            "_eval_golden_set_state": str(Path("old.json").resolve()),
+            "eval_answer_override_old_0": "stale answer",
+            "eval_manual_answers_enabled": True,
+        }
+        try:
+            ep._sync_golden_set_state(Path("new.json"))
+            assert "eval_answer_override_old_0" not in ep.st.session_state
+            assert ep.st.session_state["eval_manual_answers_enabled"] is False
+            assert ep.st.session_state["_eval_golden_set_state"] == str(Path("new.json").resolve())
+        finally:
+            ep.st.session_state = old_session_state
+
+    def test_execute_evaluation_passes_shared_pipeline_components(self, monkeypatch, tmp_path: Path) -> None:
+        from src.core.settings import load_settings
+        from src.observability.dashboard.pages import evaluation_panel as ep
+
+        settings = load_settings()
+        evaluator = object()
+        hybrid_search = object()
+        reranker = object()
+        answer_generator = lambda query, chunks: "generated"
+        captured: Dict[str, Any] = {}
+
+        class FakeRunner:
+            def __init__(self, **kwargs):
+                captured.update(kwargs)
+
+            def run(self, **kwargs):
+                captured["run_kwargs"] = kwargs
+                return SimpleNamespace(to_dict=lambda: {"aggregate_metrics": {}, "query_results": []})
+
+        monkeypatch.setattr("src.core.settings.load_settings", lambda: settings)
+        monkeypatch.setattr(
+            "src.libs.evaluator.evaluator_factory.EvaluatorFactory.create",
+            lambda settings: evaluator,
+        )
+        monkeypatch.setattr(
+            "src.observability.evaluation.pipeline.build_evaluation_pipeline",
+            lambda settings, collection: SimpleNamespace(
+                hybrid_search=hybrid_search,
+                reranker=reranker,
+                answer_generator=answer_generator,
+            ),
+        )
+        monkeypatch.setattr(
+            "src.observability.evaluation.eval_runner.EvalRunner", FakeRunner,
+        )
+
+        golden = tmp_path / "golden.json"
+        golden.write_text('{"test_cases": [{"query": "Q"}]}', encoding="utf-8")
+        ep._execute_evaluation("ragas", golden, 5, "av_actress")
+
+        assert captured["hybrid_search"] is hybrid_search
+        assert captured["reranker"] is reranker
+        assert captured["evaluator"] is evaluator
+        assert captured["answer_generator"] is answer_generator
+        assert captured["run_kwargs"]["collection"] == "av_actress"

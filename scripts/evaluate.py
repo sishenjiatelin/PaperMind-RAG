@@ -29,6 +29,8 @@ import json
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Set UTF-8 encoding for Windows console
 if sys.platform == "win32":
     import io
@@ -38,6 +40,7 @@ if sys.platform == "win32":
 # Add project root to path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 def parse_args() -> argparse.Namespace:
@@ -77,11 +80,16 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     """Main entry point."""
     args = parse_args()
+    status_stream = sys.stderr if args.json else sys.stdout
 
     try:
         from src.core.settings import load_settings
         from src.libs.evaluator.evaluator_factory import EvaluatorFactory
         from src.observability.evaluation.eval_runner import EvalRunner
+        from src.observability.evaluation.pipeline import (
+            build_answer_generator,
+            build_evaluation_pipeline,
+        )
 
         settings = load_settings()
     except Exception as exc:
@@ -98,57 +106,52 @@ def main() -> int:
 
     # Create HybridSearch (unless --no-search)
     hybrid_search = None
+    reranker = None
+    answer_generator = None
     if not args.no_search:
         try:
-            from src.core.query_engine.query_processor import QueryProcessor
-            from src.core.query_engine.hybrid_search import create_hybrid_search
-            from src.core.query_engine.dense_retriever import create_dense_retriever
-            from src.core.query_engine.sparse_retriever import create_sparse_retriever
-            from src.ingestion.storage.bm25_indexer import BM25Indexer
-            from src.libs.embedding.embedding_factory import EmbeddingFactory
-            from src.libs.vector_store.vector_store_factory import VectorStoreFactory
-
-            collection = args.collection or "default"
-
-            vector_store = VectorStoreFactory.create(
-                settings, collection_name=collection,
-            )
-            embedding_client = EmbeddingFactory.create(settings)
-            dense_retriever = create_dense_retriever(
-                settings=settings,
-                embedding_client=embedding_client,
-                vector_store=vector_store,
-            )
-            bm25_indexer = BM25Indexer(index_dir=f"data/db/bm25/{collection}")
-            sparse_retriever = create_sparse_retriever(
-                settings=settings,
-                bm25_indexer=bm25_indexer,
-                vector_store=vector_store,
-            )
-            sparse_retriever.default_collection = collection
-
-            query_processor = QueryProcessor()
-            hybrid_search = create_hybrid_search(
-                settings=settings,
-                query_processor=query_processor,
-                dense_retriever=dense_retriever,
-                sparse_retriever=sparse_retriever,
-            )
-            print(f"✅ HybridSearch initialized for collection: {collection}")
+            collection = args.collection or settings.vector_store.collection_name
+            pipeline = build_evaluation_pipeline(settings, collection)
+            hybrid_search = pipeline.hybrid_search
+            reranker = pipeline.reranker
+            answer_generator = pipeline.answer_generator
+            print(f"✅ HybridSearch initialized for collection: {collection}", file=status_stream)
         except Exception as exc:
-            print(f"⚠️  Failed to initialize search (running without retrieval): {exc}")
+            print(f"❌ Failed to initialize search: {exc}", file=sys.stderr)
+            return 2
+    else:
+        try:
+            # Keep --no-search behavior intact while sharing answer generation.
+            answer_generator = build_answer_generator(settings)
+            from src.core.query_engine.reranker import create_core_reranker
+            reranker = create_core_reranker(settings)
+        except Exception as exc:
+            print(f"❌ Failed to initialize answer generation/reranking: {exc}", file=sys.stderr)
+            return 2
+
+    try:
+        print(
+            f"✅ Reranker initialized: type={reranker.reranker_type}, "
+            f"enabled={reranker.is_enabled}",
+            file=status_stream,
+        )
+    except Exception as exc:
+        print(f"❌ Failed to initialize answer generation/reranking: {exc}", file=sys.stderr)
+        return 2
 
     # Create and run EvalRunner
     runner = EvalRunner(
         settings=settings,
         hybrid_search=hybrid_search,
         evaluator=evaluator,
+        answer_generator=answer_generator,
+        reranker=reranker,
     )
 
     try:
-        print(f"\n🔍 Running evaluation with {evaluator_name}...")
-        print(f"📄 Test set: {args.test_set}")
-        print(f"🔢 Top-K: {args.top_k}\n")
+        print(f"\n🔍 Running evaluation with {evaluator_name}...", file=status_stream)
+        print(f"📄 Test set: {args.test_set}", file=status_stream)
+        print(f"🔢 Top-K: {args.top_k}\n", file=status_stream)
 
         report = runner.run(
             test_set_path=args.test_set,

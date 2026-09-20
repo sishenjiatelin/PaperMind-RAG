@@ -83,11 +83,13 @@ class TestGoldenTestCase:
             "expected_chunk_ids": ["a", "b"],
             "expected_sources": ["doc.pdf"],
             "reference_answer": "Answer",
+            "relevance_judgments": {"a": 3, "b": 1},
         })
         assert tc.query == "Q"
         assert tc.expected_chunk_ids == ["a", "b"]
         assert tc.expected_sources == ["doc.pdf"]
         assert tc.reference_answer == "Answer"
+        assert tc.relevance_judgments == {"a": 3.0, "b": 1.0}
 
     def test_from_dict_minimal(self) -> None:
         tc = GoldenTestCase.from_dict({"query": "Q"})
@@ -165,6 +167,47 @@ class TestEvalRunner:
         report = runner.run(f)
 
         assert "Generated answer for: Q" == report.query_results[0].generated_answer
+
+    def test_reference_answer_is_display_data_not_generated_answer(self, tmp_path: Path) -> None:
+        f = tmp_path / "g.json"
+        _write_golden_json(f, [{"query": "Q", "reference_answer": "Reference"}])
+
+        runner = EvalRunner(
+            evaluator=StubEvaluator(),
+            answer_generator=lambda query, chunks: "Generated from the model",
+        )
+        report = runner.run(f)
+
+        result = report.query_results[0]
+        assert result.generated_answer == "Generated from the model"
+        assert result.reference_answer == "Reference"
+        assert result.generated_answer != result.reference_answer
+
+    def test_retrieval_metrics_and_ranked_results_are_shared_core_output(self, tmp_path: Path) -> None:
+        f = tmp_path / "g.json"
+        _write_golden_json(f, [{
+            "query": "Q",
+            "expected_chunk_ids": ["c2"],
+            "relevance_judgments": {"c2": 3},
+        }])
+        search = MagicMock()
+        search.search.return_value = [
+            MagicMock(chunk_id="c1", text="one", score=0.2, metadata={"source_path": "a.pdf"}),
+            MagicMock(chunk_id="c2", text="two", score=0.9, metadata={"source_path": "b.pdf"}),
+        ]
+
+        report = EvalRunner(
+            hybrid_search=search,
+            evaluator=StubEvaluator(),
+            answer_generator=lambda query, chunks: "generated",
+        ).run(f, top_k=2)
+
+        result = report.query_results[0]
+        assert result.retrieved_results[0]["rank"] == 1
+        assert result.retrieved_results[1]["source"] == "b.pdf"
+        assert result.metrics["hit_at_k"] == 1.0
+        assert "ndcg_at_k" in result.metrics
+        assert "ndcg_at_k" not in result.metric_status
 
     def test_report_to_dict(self, tmp_path: Path) -> None:
         f = tmp_path / "g.json"

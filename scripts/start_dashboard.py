@@ -30,6 +30,8 @@ def main() -> None:
         str(app_path),
         "--server.port", str(args.port),
         "--server.address", args.host,
+        "--server.headless", "true",
+        "--browser.gatherUsageStats", "false",
     ]
     print(f"Starting Dashboard: {' '.join(cmd)}")
     subprocess.run(cmd)
