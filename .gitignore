@@ -109,3 +109,4 @@ nonexistent_traces.jsonl/
 # Private local evaluation data
 tests/fixtures/golden_av_actress.json
 artifacts/ragas_av_actress_*
+FORWORK

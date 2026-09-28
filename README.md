@@ -3,7 +3,7 @@
 一个基于真实文档完成端到端验证的模块化 RAG + MCP 工程项目。当前版本聚焦混合检索、LLM 重排、真实答案生成、Ragas 评估、MCP Stdio 兼容与链路可观测性。
 
 > [!IMPORTANT]
-> **Upstream attribution:** 本项目基于 [jerry-ai-dev/MODULAR-RAG-MCP-SERVER](https://github.com/jerry-ai-dev/MODULAR-RAG-MCP-SERVER) 进行二次工程化扩展。上游项目提供了模块化 RAG / MCP 的原始架构与基础实现；下文 **My Engineering Extensions** 仅描述我在本仓库中新增、适配并实际验证的工作，不将上游成果声明为个人原创。上游版权与许可信息以原仓库为准。
+> **Upstream attribution:** 本项目基于 [jerry-ai-dev/MODULAR-RAG-MCP-SERVER](https://github.com/jerry-ai-dev/MODULAR-RAG-MCP-SERVER) 进行二次工程化扩展。但不必过分强调非原创，原创作者以同意我使用上游项目，所以这就是我的项目；
 
 ## Project Snapshot
 
