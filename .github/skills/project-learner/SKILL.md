@@ -1,13 +1,25 @@
 ---
 name: project-learner
-description: "Interactive project learning coach via interview-style Q&A. Reads codebase and docs, dynamically generates interview questions per knowledge domain and sub-topic, conducts up to 4 follow-up rounds, scores answers, provides learning guidance with code/doc references, and persists progress. 10 domains × 3-5 sub-topics = 45 knowledge points for comprehensive interview coverage. Use when user says '学习项目', '了解项目', '检验项目', '项目学习', '面试准备', 'learn project', 'study project', 'review project', 'interview prep', 'knowledge check', or wants to understand/master the project through guided Q&A."
+description: "Coach users through this project with Chinese interview-style Q&A, code-grounded follow-ups, scoring, study guidance, and persistent learning progress. Covers the core RAG system and the service_operations extension (M0–M5). Use for 学习项目, 项目学习, 面试准备, knowledge checks, or guided study of service operations, SQL metrics, versioned manuals, combined queries, and evaluation."
 ---
 
 # Project Learner
 
-Interactive interview-coach that helps users master this project through guided Q&A.
+Interactive interview-coach that helps users master the core RAG system and the service-operations extension through guided Q&A.
 
 All user-facing interaction in **中文**. Internal instructions in English.
+
+## Usage Examples
+
+When the skill is available by name, users can invoke `$project-learner` with their goal. Otherwise they can explicitly ask the assistant to read `.github/skills/project-learner/SKILL.md` and follow it; learning does not require running a CLI or initializing runtime data.
+
+- `请使用 project-learner 学习全项目，由你推荐第一个知识点。`
+- `请使用 project-learner，只学习 service-operations，从 D11.1 开始，一次问一个问题。`
+- `请使用 project-learner，针对 D13.3 做面试问答，重点追问 as_of 与 snapshot_id。`
+- `请使用 project-learner，复习服务运营范围内最近分最低的知识点。`
+- `请使用 project-learner，查看学习进度。`
+
+Ask one interview question at a time and wait for the user's answer. Run at most four follow-ups, then score, provide code/doc references and practice guidance, and persist the real result. If the user requests an explanation before practice, provide it before beginning the interview. Never invent user answers or learning scores.
 
 ## Pipeline Overview
 
@@ -23,13 +35,14 @@ Discovery → Check History → User Intent → Select Domain → Select Sub-top
 
 Autonomously build project understanding. Do NOT ask user anything yet.
 
-1. Read `DEV_SPEC.md` — project goals, architecture, tech stack, module design
-2. Read `config/settings.yaml` — configuration system
-3. List `src/` directory tree — module structure (core/, ingestion/, libs/, mcp_server/, observability/)
-4. Read key entry points: `main.py`, `scripts/ingest.py`, `scripts/query.py`
-5. List `tests/` — testing strategy overview
+1. Check `git branch --show-current`, `git status --short`, and the available directories. The service extension was introduced on `feat/service-operations`; its Python package is `service_operations/` (underscore). Use the checked-out code, including relevant uncommitted changes, as the implementation evidence. Do not switch branches just to conduct a learning session.
+2. Read the root `README.md`, inspect the `src/`, `scripts/`, and `tests/` structure, and consult relevant sections of `DEV_SPEC.md` and `config/settings.yaml` for core RAG topics.
+3. If `service_operations/` exists, read `service_operations/README.md` and `service_operations/docs/ARCHITECTURE.md`. For D11–D14, then load [references/service-operations.md](references/service-operations.md) and only the milestone docs and code relevant to the selected sub-topic.
+4. Verify implementation against the selected code and tests. Specs may describe planned behavior; historical milestone docs and evaluation reports are dated evidence, not proof of the current checkout's results.
 
-Build an internal mental model covering these **10 Knowledge Domains**, each containing **3-5 Sub-topics** (知识点), totaling **45 interview knowledge points**:
+The map contains **14 domains / 65 knowledge points**: D1–D10 retain the original **45** IDs; D11–D14 add **20** points covering M0–M5. If the extension is absent in the current checkout, only D1–D10 are available. Explain this availability without deleting service-domain history. A branch name alone does not prove module availability.
+
+Track full-project progress against the available map. A user can focus on **核心 RAG (D1–D10)**, **服务运营 (D11–D14)**, or **全项目**; use that scope for selection and recommendations and label any scoped progress separately from overall progress. Honor a mode/domain/sub-topic already specified in the user's request instead of asking again.
 
 ### Domain & Sub-topic Map
 
@@ -86,13 +99,37 @@ Build an internal mental model covering these **10 Knowledge Domains**, each con
 | D9.3 | pyproject.toml 工程配置：依赖管理、构建配置、工具链集成 | `pyproject.toml` |
 | D9.4 | 脚本入口设计：四大脚本的职责边界与参数化设计 | `scripts/` |
 | **D10** | **Document Manager & 幂等性** | |
-| D10.1 | 文档去重：Hash 计算与重复检测机制 | `src/ingestion/document_manager.py`, `src/libs/loader/file_integrity.py` |
+| D10.1 | 文档去重：Hash 与 collection 联合去重、旧库迁移 | `src/ingestion/document_manager.py`, `src/libs/loader/file_integrity.py` |
 | D10.2 | 增量 Ingestion：幂等性保证与文档更新策略 | `src/ingestion/document_manager.py`, `pipeline.py` |
-| D10.3 | Collection 管理：集合元数据关联与文档生命周期 | `src/ingestion/document_manager.py` |
+| D10.3 | Collection 管理：集合隔离、同一 PDF 多集合摄取与定向删除 | `src/ingestion/document_manager.py` |
 | D10.4 | 文档状态追踪：已入库/待更新/已删除的状态流转 | `src/ingestion/document_manager.py` |
+| **D11** | **服务运营数据与 SQL 指标（M0–M1）** | |
+| D11.1 | 业务任务与合成数据：设备、工单、SLA 契约和固定种子 | `service_operations/generate_m0.py`, `service_operations/config/m0.json`, `service_operations/docs/M0_FOUNDATION.md` |
+| D11.2 | 快照数据模型：SQLite schema、主外键、活动与历史快照 | `service_operations/warehouse/schema.py`, `service_operations/warehouse/importer.py` |
+| D11.3 | 导入质量与幂等：整批校验、哈希去重、拒收报告和事务回滚 | `service_operations/warehouse/importer.py`, `service_operations/tests/test_m1.py` |
+| D11.4 | 三项 SQL 指标：MTTR、SLA 达成率、30 天重复故障率 | `service_operations/metrics/query.py`, `service_operations/examples/sql/`, `service_operations/sql_examples.py` |
+| D11.5 | 指标时间与证据：半开区间、SLA 生效、30 天前序、零分母 | `service_operations/metrics/query.py`, `service_operations/m0_reference.py`, `service_operations/tests/test_m1.py` |
+| **D12** | **手册版本与检索（M2）** | |
+| D12.1 | 来源身份与校验：官方手册、自编便签、SHA-256 与物理页码 | `service_operations/docs/manual_sources.json`, `service_operations/manuals/cli.py`, `service_operations/manuals/search.py` |
+| D12.2 | 版本注册与时间筛选：logical_doc_id/version、适用型号和生效区间 | `service_operations/manuals/registry.py`, `service_operations/tests/test_m2.py` |
+| D12.3 | 双索引生命周期：staged/published/error、失败清理与定向删除 | `service_operations/manuals/search.py`, `service_operations/manuals/registry.py`, `service_operations/tests/test_m2.py` |
+| D12.4 | 检索实现：384 维 HashEmbedder、BM25、RRF 与词项重排 | `service_operations/manuals/search.py`, `src/ingestion/storage/bm25_indexer.py` |
+| D12.5 | 与原 RAG 的复用与隔离：collection 去重迁移、页内分块和版本过滤 | `src/libs/loader/file_integrity.py`, `src/ingestion/pipeline.py`, `src/ingestion/document_manager.py`, `service_operations/tests/test_m2.py` |
+| **D13** | **受控联合查询与证据合成（M3）** | |
+| D13.1 | 请求契约与校验：ServiceOpsRequest、QueryPeriod、枚举和时区 | `service_operations/contracts.py`, `service_operations/cli.py` |
+| D13.2 | 查询路由：auto/metric/document/combined 与歧义意图 | `service_operations/query_service.py`, `service_operations/tests/test_m3.py` |
+| D13.3 | 环比与快照：等长前期、百分点、as_of 和 snapshot_id 的区别 | `service_operations/query_service.py`, `service_operations/metrics/query.py` |
+| D13.4 | 文档证据与模板回答：故障术语映射、技术手册与记录便签选择 | `service_operations/query_service.py`, `service_operations/tests/test_m3.py` |
+| D13.5 | 拒答与部分失败：缺条件、无证据、任一路失败和警告语义 | `service_operations/query_service.py`, `service_operations/docs/M3_IMPLEMENTATION.md`, `service_operations/tests/test_m3.py` |
+| **D14** | **运营展示、评估与作品表达（M4–M5）** | |
+| D14.1 | Dashboard 集成：导航入口、页面与数据服务的职责边界 | `src/observability/dashboard/app.py`, `service_operations/dashboard.py`, `service_operations/dashboard_data.py` |
+| D14.2 | 趋势与工单追溯：月度分组、指标构成 ID、分页和维护报告 | `service_operations/dashboard_data.py`, `service_operations/tests/test_m4.py`, `service_operations/examples/m4/demo_script.md` |
+| D14.3 | 冻结任务与检索对照：100 例、80/20 划分、Hit@3/MRR@3 | `service_operations/evaluation/tasks.py`, `service_operations/evaluate.py`, `service_operations/docs/M5_EVALUATION.md` |
+| D14.4 | 独立参考与回归：CSV 参考算法、逐例失败报告、M1–M5 测试 | `service_operations/evaluation/reference.py`, `service_operations/tests/`, `pyproject.toml` |
+| D14.5 | 作品表达与验收边界：复现条件、人工复核、合成数据与模型限制 | `service_operations/docs/CASE_STUDY_ZH.md`, `service_operations/docs/CASE_STUDY_EN.md`, `service_operations/docs/M5_EVALUATION.md` |
 
-> **Total: 10 domains × 3-5 sub-topics = 45 knowledge points**
-> Each sub-topic can be studied multiple times with different questions, providing 100+ possible interview questions.
+> **Total when the extension is present: 14 domains / 65 knowledge points.**
+> Each sub-topic can be revisited with a different code-grounded question.
 
 ---
 
@@ -102,15 +139,19 @@ Build an internal mental model covering these **10 Knowledge Domains**, each con
 2. **File missing** → first-time learner, proceed to Phase 3
 3. **File exists** → parse BOTH tables:
    - **Domain Summary**: which domains are ⬜/🔴/🔶/✅
-   - **Sub-topic Progress**: which sub-topics are ⬜ (unlearned), 🔴 (weak ≤3), 🔶 (learning 4-6), ✅ (mastered ≥7)
-   - Count: total sub-topics mastered / 45
+   - **Sub-topic Progress**: which sub-topics are ⬜ (unlearned), 🔴 (weak <4), 🔶 (learning 4≤score<7), ✅ (mastered ≥7)
+   - Count mastered sub-topics against `N`, the number of available IDs in the map (65 with the extension, otherwise 45). Display the selected scope separately when relevant.
    - Identify lowest-scoring sub-topics for review recommendation
+
+### Existing-history migration
+
+If progress was created for the original 45 points, keep every D1–D10 score, session count, and Detailed History row. When the extension is available, append missing D11–D14 summary rows with 5 points, 0/5 mastered, 0/5 studied, no average and 未学习 status, and missing sub-topic rows with `0 | - | - | ⬜ 未学习`; update the overall denominator to `N`. Never reset existing rows or create duplicate IDs when reloading. Keep unavailable domains' saved rows but exclude them from current-checkout totals and recommendations. Viewing progress alone must not change scores or append a study session.
 
 ---
 
 ## Phase 3: User Intent
 
-Use `ask_questions` (中文) to determine what the user wants:
+Use the host's available question tool or ordinary Chinese chat to determine missing choices. If the user already specified scope, mode, domain, or sub-topic, use it directly. Offer the three study scopes (核心 RAG / 服务运营 / 全项目) only when needed; if unspecified, default to the available full project. Do not require a tool named `ask_questions`.
 
 **Question 1 — 学习模式** (single-select):
 
@@ -123,11 +164,11 @@ Use `ask_questions` (中文) to determine what the user wants:
 
 If user picks 📋 → display the full progress table from `LEARNING_PROGRESS.md` and stop.
 
-If user picks 🎯 → Agent auto-selects the optimal sub-topic (prioritize: ⬜ unlearned in weakest domain → 🔴 weak → 🔶 lowest score). Skip Question 2 & 3, go directly to Phase 4.
+If user picks 🎯 → Agent auto-selects the optimal sub-topic (within the selected scope, prioritize: ⬜ unlearned in weakest domain → 🔴 weak → 🔶 lowest score). Skip Question 2 & 3, go directly to Phase 4.
 
 **Question 2 — 知识域选择** (single-select, only for 🆕 or 📖):
 
-List all 10 domains with current status + completion rate. Example format:
+List available domains in the selected scope with current status + completion rate. Example format:
 - `D1 RAG Pipeline 整体架构 [2/5 ✅] 🔶`
 - `D2 Ingestion Pipeline [0/5 ✅] ⬜`
 
@@ -156,7 +197,7 @@ Based on the selected **sub-topic** (not just domain):
 
 ### Question Design Principles
 
-- Questions MUST reference real code/architecture from THIS project, never generic
+- Questions MUST reference real code/architecture from THIS project, never generic; for D11–D14 apply the implementation boundaries in references/service-operations.md
 - Questions should be specific to the sub-topic, not the whole domain
 - Difficulty progression for follow-ups:
   - Follow-up 1: "为什么这样设计？" (design rationale)
@@ -249,7 +290,7 @@ After Q&A ends, output a structured evaluation report (中文):
 
 ### 🏆 综合评分: X/10
 
-### 📊 学习进度: [mastered count]/45 知识点已掌握
+### 📊 学习进度: [mastered count]/[N] 知识点已掌握
 ```
 
 Scoring rules:
@@ -297,7 +338,7 @@ Guidelines:
 
 Update `.github/skills/project-learner/references/LEARNING_PROGRESS.md`.
 
-If file doesn't exist, create it from the template in [references/LEARNING_PROGRESS.md](references/LEARNING_PROGRESS.md). If it exists, update it.
+If missing, initialize the Domain Summary and Sub-topic Progress from the available domain map, with zero sessions and no scores, plus an empty Detailed History table. The checked-in [references/LEARNING_PROGRESS.md](references/LEARNING_PROGRESS.md) shows the format. If present, migrate missing IDs as described in Phase 2, then update only actual learning results.
 
 ### Update Rules
 
@@ -306,15 +347,15 @@ If file doesn't exist, create it from the template in [references/LEARNING_PROGR
    - 已学 = count of sessions for that sub-topic
    - 最高分 = max score across all sessions for this sub-topic
    - 最近分 = score from this session
-   - Status: ≥7 → ✅ 掌握, 4-6 → 🔶 学习中, ≤3 → 🔴 薄弱, 0 sessions → ⬜ 未学习
+   - Status based on 最近分: ≥7 → ✅ 掌握, 4≤score<7 → 🔶 学习中, <4 → 🔴 薄弱, 0 sessions → ⬜ 未学习
 3. **Recalculate** the `Domain Summary` table:
    - 已掌握 = count of ✅ sub-topics in that domain / total sub-topics in domain
    - 已学习 = count of non-⬜ sub-topics / total sub-topics
-   - 平均分 = average score of all studied sub-topics in domain
+   - 平均分 = average 最近分 of studied sub-topics in domain
    - Domain status: all sub-topics ✅ → ✅ 掌握, any studied → 🔶 学习中 or 🔴 薄弱 (based on avg), none → ⬜ 未学习
 4. **Update** the `Last updated` timestamp
 5. **Update** the session counter `#` (auto-increment)
-6. **Update** the overall progress line: `总进度: X/45 知识点已掌握`
+6. **Update** the overall progress line: `总进度: X/[N] 知识点已掌握`
 
 ---
 
@@ -338,7 +379,7 @@ After persisting, ask the user (中文):
 - 平均得分: X/10
 - 最强知识点: [sub-topic] (X/10)
 - 需加强知识点: [sub-topic] (X/10)
-- 总进度: X/45 知识点已掌握 (XX%)
+- 总进度: X/[N] 知识点已掌握 (XX%)
 
 继续加油！下次建议学习: [recommended sub-topic name]
 ```
@@ -349,9 +390,13 @@ After persisting, ask the user (中文):
 
 | File | Purpose |
 |------|---------|
-| `.github/skills/project-learner/references/LEARNING_PROGRESS.md` | Persistent learning state (45 sub-topics) |
+| `.github/skills/project-learner/references/LEARNING_PROGRESS.md` | Persistent learning state (65 sub-topics with service operations; preserve history) |
 | `DEV_SPEC.md` | Project specification & architecture |
 | `config/settings.yaml` | Configuration reference |
-| `src/` | All source code modules |
+| `src/` | Core RAG source modules |
+| `service_operations/` | Service-operations business package, docs, examples, CLI and tests |
+| `service_operations/DEV_SPEC.md` | Extension goals and M0–M5 acceptance criteria |
+| `service_operations/runtime/` | Local generated DB/index/evaluation output; check availability before hands-on work |
+| `references/service-operations.md` | D11–D14 study constraints, evidence and practice routing |
 | `tests/` | Test suite for understanding test strategy |
 | `scripts/` | CLI entry points (ingest/query/evaluate) |

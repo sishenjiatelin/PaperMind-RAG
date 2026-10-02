@@ -1,0 +1,39 @@
+{
+  "as_of": "2026-09-28T00:00:00+08:00",
+  "config_path": "service_operations/config/m0.json",
+  "config_sha256": "3312b3319130093a213fe2c6d159f435ec924867357a74eec082d99357703598",
+  "end_date_exclusive": "2026-09-01",
+  "files": {
+    "assets.csv": {
+      "rows": 18,
+      "sha256": "3d50605b024a46efc0cfdc39fc73a89cf2131993c3cfe8cd1cbb5e9c2c0b0a3c"
+    },
+    "invalid/invalid_cases.json": {
+      "rows": 6,
+      "sha256": "c12f545c6b61db48c4345af88eb18f25476b2d25645a5c38176326e3339b3de9"
+    },
+    "invalid/invalid_work_orders.csv": {
+      "rows": 6,
+      "sha256": "e0be0223cae9f68e410d1c71ca23f877f2631ebe96dd6547563c1d9e99d17734"
+    },
+    "reference_cases.json": {
+      "rows": 5,
+      "sha256": "c1ff3f00112a3f8fa8dfbe920d33e1faafa2a0ea6765add8f031910554fa61dc"
+    },
+    "sla_policies.csv": {
+      "rows": 4,
+      "sha256": "306602bb4d14c8cc669630366589337041b303abad80b4e3297a22c9c801ed8d"
+    },
+    "work_orders.csv": {
+      "rows": 670,
+      "sha256": "fca50b725b6eaf8bed3f90fdf959c8fd43b1da714124a8d9e9318f99e63eeabd"
+    }
+  },
+  "generator_version": "1",
+  "manual_source_registry": "service_operations/docs/manual_sources.json",
+  "scenario": "fictional additive manufacturing service fleet",
+  "schema_version": "m0-v1",
+  "seed": 20260928,
+  "start_date": "2025-10-01",
+  "synthetic": true
+}

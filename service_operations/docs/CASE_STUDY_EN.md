@@ -1,0 +1,9 @@
+# Portfolio case | Service operations assistant
+
+**Problem.** A service manager needs traceable repair and SLA trends. A field engineer needs troubleshooting guidance from the manual version applicable to a given model and date. This extension connects structured work orders to versioned PDF evidence on top of an existing general PDF retrieval project.
+
+**Contribution.** I defined MTTR, SLA attainment, and 30-day repeat-fault rate, including time windows, denominators, and empty-result behavior. I generated 670 clearly synthetic work orders under a fixed seed, added full-batch validation and atomic SQLite snapshot import, and registered two public manufacturer manuals plus two project-authored record notes with hashes and effective dates. The query service uses parameterized SQL for numbers and version-gated hash-vector/BM25 retrieval for documents. A Streamlit page exposes trends, underlying orders, combined questions, and data-quality status.
+
+**Evidence.** A separate CSV calculation supplies expected metric values for a fixed 100-case task set, split into 80 development and 20 holdout cases. Local automated checks passed 100/100, including 20/20 holdout. Raw document Hit@3 was 16/20 for both hybrid retrieval and the BM25 baseline; MRR@3 was 0.8000 versus 0.3667. An initial wrong-page citation led to an exact error-code ranking fix. The [evaluation report](M5_EVALUATION.md) records task and snapshot hashes, individual failure history, and reproduction commands.
+
+**Limits.** All operational data is synthetic. The PDFs are manufacturer documents; record notes are fictional project content. The vector adapter is deterministic lexical hashing, and responses use templates rather than a generative model. There is no production deployment or measured business impact. Source labels and troubleshooting meaning still need independent human review; the automated 100-case result must not be described as 100 manually verified cases.

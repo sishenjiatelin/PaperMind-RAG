@@ -257,7 +257,7 @@ class DocumentManager:
         # 4. FileIntegrity – remove the ingestion record
         try:
             result.integrity_removed = self.integrity.remove_record(
-                source_hash
+                source_hash, collection
             )
         except Exception as e:
             result.errors.append(f"FileIntegrity remove failed: {e}")

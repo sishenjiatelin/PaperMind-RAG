@@ -1,0 +1,26 @@
+[
+  {
+    "csv_row_number": 2,
+    "expected_rule_id": "DUPLICATE_WORK_ORDER_ID"
+  },
+  {
+    "csv_row_number": 3,
+    "expected_rule_id": "UNKNOWN_ASSET"
+  },
+  {
+    "csv_row_number": 4,
+    "expected_rule_id": "INVALID_PRIORITY"
+  },
+  {
+    "csv_row_number": 5,
+    "expected_rule_id": "RESOLVED_WITHOUT_TIMESTAMP"
+  },
+  {
+    "csv_row_number": 6,
+    "expected_rule_id": "RESOLVED_BEFORE_OPENED"
+  },
+  {
+    "csv_row_number": 7,
+    "expected_rule_id": "INVALID_TIMESTAMP"
+  }
+]

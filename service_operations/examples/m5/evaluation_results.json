@@ -1,0 +1,2208 @@
+{
+  "generated_at_utc": "2026-09-28T06:07:22.271468+00:00",
+  "task_sha256": "0a63756e098ff4be354fdcf3ad9d23c833b408e9e711f0d26d90666d9fd2437c",
+  "split": "all",
+  "data_snapshot": {
+    "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c",
+    "source_hash": "a86e1638f41f3c63a098abf76310de940a3ac9ccbe2dfb6ab2f913c6952b7aa1",
+    "imported_at": "2026-09-28T04:20:13Z",
+    "row_counts": {
+      "assets.csv": {
+        "imported": 18,
+        "rejected": 0,
+        "total": 18,
+        "valid": 18
+      },
+      "sla_policies.csv": {
+        "imported": 4,
+        "rejected": 0,
+        "total": 4,
+        "valid": 4
+      },
+      "work_orders.csv": {
+        "imported": 670,
+        "rejected": 0,
+        "total": 670,
+        "valid": 670
+      }
+    }
+  },
+  "manual_registry": [
+    {
+      "logical_doc_id": "demo_taz_pro_service_record_note",
+      "version": "v1",
+      "source_hash": "2f60f0869da831841335b33c26b0dc280dc01c973a83ebc8a6f00f23e876701c",
+      "chunk_count": 1
+    },
+    {
+      "logical_doc_id": "demo_taz_pro_service_record_note",
+      "version": "v2",
+      "source_hash": "8172c51b12396fa843eaf597c718eb4260667e978250b51cab41199f15ae5336",
+      "chunk_count": 1
+    },
+    {
+      "logical_doc_id": "lulzbot_taz_pro_user_manual",
+      "version": "demo-registry-v1",
+      "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940",
+      "chunk_count": 166
+    },
+    {
+      "logical_doc_id": "lulzbot_taz_workhorse_user_manual",
+      "version": "demo-registry-v1",
+      "source_hash": "1bb8b35e2fa99c3866cbe717be2781d5e52a0efb0d2d25dacc2fc5ac22f91af5",
+      "chunk_count": 165
+    }
+  ],
+  "retrieval_config": {
+    "hybrid": "hash-vector cosine + BM25, RRF k=60, lexical rerank; top_k=3",
+    "baseline": "BM25 only; same model/effective-version gate; top_k=3",
+    "embedding": "deterministic 384-dimensional lexical hash; no hosted model"
+  },
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "sqlite": "3.45.1",
+    "latency_note": "Local sequential warm-index wall time; no concurrency or production QPS inference"
+  },
+  "review_status": "automatic checks only; PDF source/page labels and answer wording require human review",
+  "summary": {
+    "cases": 100,
+    "passed": 100,
+    "failed": 0,
+    "by_category": {
+      "combined": {
+        "cases": 12,
+        "passed": 12,
+        "failed": 0
+      },
+      "document": {
+        "cases": 20,
+        "passed": 20,
+        "failed": 0
+      },
+      "metric": {
+        "cases": 60,
+        "passed": 60,
+        "failed": 0
+      },
+      "refusal": {
+        "cases": 8,
+        "passed": 8,
+        "failed": 0
+      }
+    },
+    "failure_codes": {},
+    "document_retrieval": {
+      "hybrid_hit_at_3": 16,
+      "bm25_hit_at_3": 16,
+      "cases": 20,
+      "hybrid_mrr_at_3": 0.8,
+      "bm25_mrr_at_3": 0.3667
+    }
+  },
+  "case_results": [
+    {
+      "case_id": "metric-001",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 53.478462,
+          "numerator": 1390.44,
+          "denominator": 26,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-002",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 72.2695,
+          "numerator": 1445.39,
+          "denominator": 20,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-003",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 45.313889,
+          "numerator": 815.65,
+          "denominator": 18,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-004",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 52.577917,
+          "numerator": 1261.87,
+          "denominator": 24,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-005",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 62.507407,
+          "numerator": 1687.7,
+          "denominator": 27,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-006",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 61.605,
+          "numerator": 985.68,
+          "denominator": 16,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-007",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 66.574,
+          "numerator": 998.61,
+          "denominator": 15,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-008",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 35.64,
+          "numerator": 677.16,
+          "denominator": 19,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-009",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 50.498947,
+          "numerator": 959.48,
+          "denominator": 19,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-010",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 58.598462,
+          "numerator": 1523.56,
+          "denominator": 26,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-011",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 35.06,
+          "numerator": 736.26,
+          "denominator": 21,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-012",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 55.383333,
+          "numerator": 1661.5,
+          "denominator": 30,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-013",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 53.4765,
+          "numerator": 1069.53,
+          "denominator": 20,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-014",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 51.364375,
+          "numerator": 821.83,
+          "denominator": 16,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-015",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 44.34625,
+          "numerator": 1064.31,
+          "denominator": 24,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-016",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 46.466111,
+          "numerator": 836.39,
+          "denominator": 18,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-017",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 47.501379,
+          "numerator": 1377.54,
+          "denominator": 29,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-018",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 60.40037,
+          "numerator": 1630.81,
+          "denominator": 27,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-019",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 55.392692,
+          "numerator": 1440.21,
+          "denominator": 26,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-020",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 77.446136,
+          "numerator": 3407.63,
+          "denominator": 44,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-021",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.961538,
+          "numerator": 25,
+          "denominator": 26,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-022",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.9,
+          "numerator": 18,
+          "denominator": 20,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-023",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.833333,
+          "numerator": 15,
+          "denominator": 18,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-024",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.791667,
+          "numerator": 19,
+          "denominator": 24,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-025",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.7,
+          "numerator": 21,
+          "denominator": 30,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-026",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.8125,
+          "numerator": 13,
+          "denominator": 16,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-027",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.769231,
+          "numerator": 10,
+          "denominator": 13,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-028",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.95,
+          "numerator": 19,
+          "denominator": 20,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-029",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.7,
+          "numerator": 14,
+          "denominator": 20,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-030",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.692308,
+          "numerator": 18,
+          "denominator": 26,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-031",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.9,
+          "numerator": 18,
+          "denominator": 20,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-032",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.866667,
+          "numerator": 26,
+          "denominator": 30,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-033",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.947368,
+          "numerator": 18,
+          "denominator": 19,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-034",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.6875,
+          "numerator": 11,
+          "denominator": 16,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-035",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.724138,
+          "numerator": 21,
+          "denominator": 29,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-036",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.941176,
+          "numerator": 16,
+          "denominator": 17,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-037",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.928571,
+          "numerator": 26,
+          "denominator": 28,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-038",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.785714,
+          "numerator": 22,
+          "denominator": 28,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-039",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.777778,
+          "numerator": 21,
+          "denominator": 27,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-040",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.555556,
+          "numerator": 25,
+          "denominator": 45,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-041",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.615385,
+          "numerator": 16,
+          "denominator": 26,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-042",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.65,
+          "numerator": 13,
+          "denominator": 20,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-043",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.55,
+          "numerator": 11,
+          "denominator": 20,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-044",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.565217,
+          "numerator": 13,
+          "denominator": 23,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-045",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.758621,
+          "numerator": 22,
+          "denominator": 29,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-046",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.25,
+          "numerator": 4,
+          "denominator": 16,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-047",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.5,
+          "numerator": 8,
+          "denominator": 16,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-048",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.5,
+          "numerator": 9,
+          "denominator": 18,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-049",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.6,
+          "numerator": 12,
+          "denominator": 20,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-050",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.461538,
+          "numerator": 12,
+          "denominator": 26,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-051",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.454545,
+          "numerator": 10,
+          "denominator": 22,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-052",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.733333,
+          "numerator": 22,
+          "denominator": 30,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-053",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.631579,
+          "numerator": 12,
+          "denominator": 19,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-054",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.4375,
+          "numerator": 7,
+          "denominator": 16,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-055",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.62069,
+          "numerator": 18,
+          "denominator": 29,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-056",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.380952,
+          "numerator": 8,
+          "denominator": 21,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-057",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.769231,
+          "numerator": 20,
+          "denominator": 26,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-058",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.740741,
+          "numerator": 20,
+          "denominator": 27,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-059",
+      "category": "metric",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.576923,
+          "numerator": 15,
+          "denominator": 26,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "metric-060",
+      "category": "metric",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.833333,
+          "numerator": 40,
+          "denominator": 48,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "document-001",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-002",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-003",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-004",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-005",
+      "category": "document",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 82,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-006",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 82,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-007",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 82,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-008",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 82,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-009",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_workhorse_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "1bb8b35e2fa99c3866cbe717be2781d5e52a0efb0d2d25dacc2fc5ac22f91af5"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 3
+    },
+    {
+      "case_id": "document-010",
+      "category": "document",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_workhorse_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "1bb8b35e2fa99c3866cbe717be2781d5e52a0efb0d2d25dacc2fc5ac22f91af5"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 3
+    },
+    {
+      "case_id": "document-011",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_workhorse_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "1bb8b35e2fa99c3866cbe717be2781d5e52a0efb0d2d25dacc2fc5ac22f91af5"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 3
+    },
+    {
+      "case_id": "document-012",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_workhorse_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "1bb8b35e2fa99c3866cbe717be2781d5e52a0efb0d2d25dacc2fc5ac22f91af5"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 3
+    },
+    {
+      "case_id": "document-013",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_workhorse_user_manual",
+            "version": "demo-registry-v1",
+            "page": 82,
+            "source_hash": "1bb8b35e2fa99c3866cbe717be2781d5e52a0efb0d2d25dacc2fc5ac22f91af5"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-014",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_workhorse_user_manual",
+            "version": "demo-registry-v1",
+            "page": 82,
+            "source_hash": "1bb8b35e2fa99c3866cbe717be2781d5e52a0efb0d2d25dacc2fc5ac22f91af5"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-015",
+      "category": "document",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_workhorse_user_manual",
+            "version": "demo-registry-v1",
+            "page": 82,
+            "source_hash": "1bb8b35e2fa99c3866cbe717be2781d5e52a0efb0d2d25dacc2fc5ac22f91af5"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-016",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "lulzbot_taz_workhorse_user_manual",
+            "version": "demo-registry-v1",
+            "page": 82,
+            "source_hash": "1bb8b35e2fa99c3866cbe717be2781d5e52a0efb0d2d25dacc2fc5ac22f91af5"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": 1,
+      "bm25_rank_at_3": 2
+    },
+    {
+      "case_id": "document-017",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v1",
+            "page": 1,
+            "source_hash": "2f60f0869da831841335b33c26b0dc280dc01c973a83ebc8a6f00f23e876701c"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "document-018",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v1",
+            "page": 1,
+            "source_hash": "2f60f0869da831841335b33c26b0dc280dc01c973a83ebc8a6f00f23e876701c"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "document-019",
+      "category": "document",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v2",
+            "page": 1,
+            "source_hash": "8172c51b12396fa843eaf597c718eb4260667e978250b51cab41199f15ae5336"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "document-020",
+      "category": "document",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": null,
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v2",
+            "page": 1,
+            "source_hash": "8172c51b12396fa843eaf597c718eb4260667e978250b51cab41199f15ae5336"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-001",
+      "category": "combined",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.625,
+          "numerator": 5,
+          "denominator": 8,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v1",
+            "page": 1,
+            "source_hash": "2f60f0869da831841335b33c26b0dc280dc01c973a83ebc8a6f00f23e876701c"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-002",
+      "category": "combined",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.5,
+          "numerator": 3,
+          "denominator": 6,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v1",
+            "page": 1,
+            "source_hash": "2f60f0869da831841335b33c26b0dc280dc01c973a83ebc8a6f00f23e876701c"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-003",
+      "category": "combined",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.428571,
+          "numerator": 3,
+          "denominator": 7,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v1",
+            "page": 1,
+            "source_hash": "2f60f0869da831841335b33c26b0dc280dc01c973a83ebc8a6f00f23e876701c"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-004",
+      "category": "combined",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.625,
+          "numerator": 5,
+          "denominator": 8,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v1",
+            "page": 1,
+            "source_hash": "2f60f0869da831841335b33c26b0dc280dc01c973a83ebc8a6f00f23e876701c"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-005",
+      "category": "combined",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.5,
+          "numerator": 3,
+          "denominator": 6,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v1",
+            "page": 1,
+            "source_hash": "2f60f0869da831841335b33c26b0dc280dc01c973a83ebc8a6f00f23e876701c"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-006",
+      "category": "combined",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.428571,
+          "numerator": 3,
+          "denominator": 7,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v1",
+            "page": 1,
+            "source_hash": "2f60f0869da831841335b33c26b0dc280dc01c973a83ebc8a6f00f23e876701c"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-007",
+      "category": "combined",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.888889,
+          "numerator": 8,
+          "denominator": 9,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v2",
+            "page": 1,
+            "source_hash": "8172c51b12396fa843eaf597c718eb4260667e978250b51cab41199f15ae5336"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-008",
+      "category": "combined",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.666667,
+          "numerator": 6,
+          "denominator": 9,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v2",
+            "page": 1,
+            "source_hash": "8172c51b12396fa843eaf597c718eb4260667e978250b51cab41199f15ae5336"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-009",
+      "category": "combined",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.733333,
+          "numerator": 11,
+          "denominator": 15,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v2",
+            "page": 1,
+            "source_hash": "8172c51b12396fa843eaf597c718eb4260667e978250b51cab41199f15ae5336"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-010",
+      "category": "combined",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.888889,
+          "numerator": 8,
+          "denominator": 9,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v2",
+            "page": 1,
+            "source_hash": "8172c51b12396fa843eaf597c718eb4260667e978250b51cab41199f15ae5336"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-011",
+      "category": "combined",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.666667,
+          "numerator": 6,
+          "denominator": 9,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v2",
+            "page": 1,
+            "source_hash": "8172c51b12396fa843eaf597c718eb4260667e978250b51cab41199f15ae5336"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "combined-012",
+      "category": "combined",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [],
+        "metric": {
+          "value": 0.733333,
+          "numerator": 11,
+          "denominator": 15,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": [
+          {
+            "logical_doc_id": "demo_taz_pro_service_record_note",
+            "version": "v2",
+            "page": 1,
+            "source_hash": "8172c51b12396fa843eaf597c718eb4260667e978250b51cab41199f15ae5336"
+          },
+          {
+            "logical_doc_id": "lulzbot_taz_pro_user_manual",
+            "version": "demo-registry-v1",
+            "page": 83,
+            "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940"
+          }
+        ]
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "refusal-001",
+      "category": "refusal",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [
+          "UNRESOLVED_INTENT"
+        ],
+        "metric": null,
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "refusal-002",
+      "category": "refusal",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [
+          "MISSING_MODEL"
+        ],
+        "metric": null,
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "refusal-003",
+      "category": "refusal",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [
+          "MISSING_PERIOD"
+        ],
+        "metric": null,
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "refusal-004",
+      "category": "refusal",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [
+          "PERIOD_AFTER_AS_OF"
+        ],
+        "metric": null,
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "refusal-005",
+      "category": "refusal",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [
+          "NO_ELIGIBLE_WORK_ORDERS"
+        ],
+        "metric": {
+          "value": null,
+          "numerator": 0.0,
+          "denominator": 0,
+          "snapshot_id": "batch-f31adc263e934d55a8b0bd37dc4aaf5c"
+        },
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "refusal-006",
+      "category": "refusal",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [
+          "AMBIGUOUS_METRIC"
+        ],
+        "metric": null,
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "refusal-007",
+      "category": "refusal",
+      "split": "development",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [
+          "NO_APPLICABLE_MANUAL"
+        ],
+        "metric": null,
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    },
+    {
+      "case_id": "refusal-008",
+      "category": "refusal",
+      "split": "holdout",
+      "passed": true,
+      "errors": [],
+      "actual": {
+        "warnings": [
+          "MISSING_MODEL",
+          "METRIC_EVIDENCE_MISSING",
+          "DOCUMENT_EVIDENCE_MISSING"
+        ],
+        "metric": null,
+        "citations": []
+      },
+      "hybrid_rank_at_3": null,
+      "bm25_rank_at_3": null
+    }
+  ]
+}

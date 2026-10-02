@@ -5,6 +5,8 @@
 > [!IMPORTANT]
 > **Upstream attribution:** 本项目基于 [jerry-ai-dev/MODULAR-RAG-MCP-SERVER](https://github.com/jerry-ai-dev/MODULAR-RAG-MCP-SERVER) 进行二次工程化扩展。上游项目提供了模块化 RAG / MCP 的原始架构与基础实现；下文 **My Engineering Extensions** 仅描述我在本仓库中新增、适配并实际验证的工作，不将上游成果声明为个人原创。上游版权与许可信息以原仓库为准。
 
+独立的设备售后服务运营扩展（M0–M5）集中在 [service_operations/](service_operations/README.md)，其合成业务样本与原 RAG 技术基线分开说明。
+
 ## Project Snapshot
 
 | Area | Verified Result |

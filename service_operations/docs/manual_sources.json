@@ -1,0 +1,72 @@
+{
+  "checked_on": "2026-09-28",
+  "license_note": "Official PDFs state CC BY-SA 4.0. Preserve author, source URL, license, and modification notice. Project-authored service record PDFs are fictional demonstration content, translated from the Chinese note sources. Local official PDFs are downloaded into ignored runtime storage and verified by SHA-256 before indexing.",
+  "documents": [
+    {
+      "logical_doc_id": "lulzbot_taz_pro_user_manual",
+      "model": "TAZ_PRO",
+      "title": "LulzBot TAZ Pro User Manual",
+      "author": "Aleph Objects, Inc.",
+      "source_url": "https://download.lulzbot.com/TAZ/TAZ_Pro/v1.0.3/documentation/manual/TAZPro_Manual.pdf",
+      "source_release": "TAZ_Pro/v1.0.3 directory; not verified as manual revision",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "relevant_section": "5.1 Troubleshooting; PROBE FAIL CLEAN NOZZLE, HEATING FAILED",
+      "source_hash": "62672f7c8c2e71035d87f2c98a6e790364d1ea9bf88b741475bd35d9f3e7d940",
+      "local_path": "service_operations/runtime/manuals/TAZPro_Manual.pdf",
+      "publication_status": "source_verified_ready_to_index",
+      "version": "demo-registry-v1",
+      "effective_from": "2025-10-01T00:00:00+08:00",
+      "effective_to": null,
+      "page_count": 110,
+      "file_bytes": 23583114
+    },
+    {
+      "logical_doc_id": "lulzbot_taz_workhorse_user_manual",
+      "model": "TAZ_WORKHORSE",
+      "title": "LulzBot TAZ Workhorse User Manual",
+      "author": "Aleph Objects, Inc.",
+      "source_url": "https://download.lulzbot.com/TAZ/TAZ_WE/v1.0.2/documentation/Manual/TAZ_Workhorse_Manual.pdf",
+      "source_release": "TAZ_WE/v1.0.2 directory; not verified as manual revision",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "relevant_section": "5.1 Troubleshooting; MINTEMP, MAXTEMP, Thermal Error E1",
+      "source_hash": "1bb8b35e2fa99c3866cbe717be2781d5e52a0efb0d2d25dacc2fc5ac22f91af5",
+      "local_path": "service_operations/runtime/manuals/TAZ_Workhorse_Manual.pdf",
+      "publication_status": "source_verified_ready_to_index",
+      "version": "demo-registry-v1",
+      "effective_from": "2025-10-01T00:00:00+08:00",
+      "effective_to": null,
+      "page_count": 110,
+      "file_bytes": 25574426
+    }
+  ],
+  "demo_notes": [
+    {
+      "logical_doc_id": "demo_taz_pro_service_record_note",
+      "model": "TAZ_PRO",
+      "version": "v1",
+      "effective_from": "2025-10-01T00:00:00+08:00",
+      "effective_to": "2026-07-01T00:00:00+08:00",
+      "source_path": "service_operations/docs/notes/taz_pro_record_v1.md",
+      "publication_status": "demo_pdf_ready_to_index",
+      "pdf_path": "service_operations/examples/manuals/taz_pro_record_v1.pdf",
+      "source_hash": "2f60f0869da831841335b33c26b0dc280dc01c973a83ebc8a6f00f23e876701c",
+      "page_count": 1,
+      "source_note": "service_operations/docs/notes/taz_pro_record_v1.md"
+    },
+    {
+      "logical_doc_id": "demo_taz_pro_service_record_note",
+      "model": "TAZ_PRO",
+      "version": "v2",
+      "effective_from": "2026-07-01T00:00:00+08:00",
+      "effective_to": null,
+      "source_path": "service_operations/docs/notes/taz_pro_record_v2.md",
+      "publication_status": "demo_pdf_ready_to_index",
+      "pdf_path": "service_operations/examples/manuals/taz_pro_record_v2.pdf",
+      "source_hash": "8172c51b12396fa843eaf597c718eb4260667e978250b51cab41199f15ae5336",
+      "page_count": 1,
+      "source_note": "service_operations/docs/notes/taz_pro_record_v2.md"
+    }
+  ]
+}

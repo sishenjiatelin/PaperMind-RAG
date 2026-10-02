@@ -1,0 +1,99 @@
+{
+  "schema_version": "m0-v1",
+  "generator_version": "1",
+  "seed": 20260928,
+  "timezone": "Asia/Shanghai",
+  "start_date": "2025-10-01",
+  "end_date_exclusive": "2026-09-01",
+  "as_of": "2026-09-28T00:00:00+08:00",
+  "tickets_per_day": 2,
+  "assets_per_model_site": 3,
+  "models": [
+    "TAZ_PRO",
+    "TAZ_WORKHORSE"
+  ],
+  "sites": [
+    "EAST",
+    "SOUTH",
+    "WEST"
+  ],
+  "fault_codes": [
+    "NOZZLE_WIPE",
+    "HOTEND_TEMP",
+    "FILAMENT_FEED",
+    "BED_ADHESION",
+    "MOTION_AXIS"
+  ],
+  "fault_weights": {
+    "TAZ_PRO": [
+      15,
+      25,
+      25,
+      20,
+      15
+    ],
+    "TAZ_WORKHORSE": [
+      0,
+      30,
+      25,
+      25,
+      15
+    ]
+  },
+  "trend": {
+    "model": "TAZ_PRO",
+    "fault_code": "NOZZLE_WIPE",
+    "from_date": "2026-04-01",
+    "weight_after": 40
+  },
+  "priority_weights": {
+    "P1": 12,
+    "P2": 52,
+    "P3": 36
+  },
+  "median_resolution_hours": {
+    "P1": 12,
+    "P2": 36,
+    "P3": 72
+  },
+  "resolution_log_sigma": 0.65,
+  "min_resolution_hours": 0.5,
+  "max_resolution_hours": 240,
+  "open_probability": 0.08,
+  "repeat_attempt_probability": 0.18,
+  "south_delay": {
+    "from_date": "2026-07-01",
+    "factor": 1.35
+  },
+  "sla_policies": [
+    {
+      "policy_id": "P1-2025",
+      "priority": "P1",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "",
+      "resolution_hours": 24
+    },
+    {
+      "policy_id": "P2-2025",
+      "priority": "P2",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "2026-04-01T00:00:00+08:00",
+      "resolution_hours": 72
+    },
+    {
+      "policy_id": "P2-2026",
+      "priority": "P2",
+      "effective_from": "2026-04-01T00:00:00+08:00",
+      "effective_to": "",
+      "resolution_hours": 48
+    },
+    {
+      "policy_id": "P3-2025",
+      "priority": "P3",
+      "effective_from": "2025-01-01T00:00:00+08:00",
+      "effective_to": "",
+      "resolution_hours": 168
+    }
+  ],
+  "open_window_days": 90
+}

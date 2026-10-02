@@ -39,6 +39,12 @@ def _page_query_traces() -> None:
     render()
 
 
+def _page_service_operations() -> None:
+    from service_operations.dashboard import render
+
+    render()
+
+
 def _page_evaluation_panel() -> None:
     from src.observability.dashboard.pages.evaluation_panel import render
     render()
@@ -49,6 +55,7 @@ def _page_evaluation_panel() -> None:
 pages = [
     st.Page(_page_overview, title="Overview", icon="📊", default=True),
     st.Page(_page_data_browser, title="Data Browser", icon="🔍"),
+    st.Page(_page_service_operations, title="Service Operations", icon="🛠️"),
     st.Page(_page_ingestion_manager, title="Ingestion Manager", icon="📥"),
     st.Page(_page_ingestion_traces, title="Ingestion Traces", icon="🔬"),
     st.Page(_page_query_traces, title="Query Traces", icon="🔎"),
